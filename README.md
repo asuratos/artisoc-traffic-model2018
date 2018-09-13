@@ -29,6 +29,7 @@ Asocial (apathetic) cars do not pay attention to their effect on the other cars 
 They change lanes whenever they seen an opportunity to speed up, ignoring cars behind them.
 
 All cars attempt to accelerate to their ideal speed whenever possible.
+If a car is in the "recovering" state, their acceleration is reduced to 25% *(arbitrary value)*
 
 ## Stop lights
 
@@ -45,13 +46,16 @@ Cars begin the simulation with these initial parameters:
 * Random (x,y) position on the road
 * Random (normal distribution around road ideal speed) starting speed, equal to their maximum speed
 * Fixed per-step acceleration (currently fixed at 5m/s^2)
-* Fixed starting "patience" value, which determines how long they will wait before changing lanes (currently fixed at 0)
+* Fixed recovery time that determines how long after a forced deceleration a car has stunted acceleration. (currently fixed at 10)
+* Fixed starting "patience" value, which determines how long they will wait before changing lanes **(currently fixed at 0)**
 * Target lane that they tend to lane change towards **(not currently active)**
 
 ## Simulation step
 Each car step will proceed as follows, in order:
 
 1. If the car is not at its maximum speed, it will accelerate (increment its speed by its acceleration).
+
+    * If currently recovering, accelerate only by 25% of acceleration
 
 2. Check its "headway" (open space ahead of them).
 
@@ -67,11 +71,11 @@ Each car step will proceed as follows, in order:
 
     * If headway is less than current speed, check patience value.
 
-        * If patience != 0, then decelerate to a speed = headway\*0.6 and decrement patience.
+        * If patience != 0, then decelerate to a speed = headway\*0.6 , decrement patience, and enter "recovering" state.
 
         * If patience == 0, change lanes to most open lane if asocial. If social, one last check:
 
-            * If there is a car behind on the target lane, do not lane change. Decrement patience.
+            * If there is a car behind on the target lane, do not lane change. Decrement patience and enter "recovering" state.
 
             * Otherwise, change lanes.
 

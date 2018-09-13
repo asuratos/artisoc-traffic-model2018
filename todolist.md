@@ -1,3 +1,4 @@
 # To-do:
 * Increase impact of lane changes
-* Add a patience value
+* look up acceleration profiles for cars (currently only binary)
+* Add patience mechanics
