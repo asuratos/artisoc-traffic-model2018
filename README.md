@@ -5,8 +5,8 @@ Traffic model for the effect of lane changing on road throughput. New repository
 # Simulation elements:
 ## Road
 
-The Space in which the simulation agents move and interact. 
-Road size is 3x300 where the length of a car is 1, and obeys cyclic boundary conditions. 
+The Space in which the simulation agents move and interact.
+Road size is 3x300 where the length of a car is 1, and obeys cyclic boundary conditions.
 Stop lights are placed at uniform intervals along the road.
 The user can define an Ideal speed for the road that determines the speed distribution of cars and the stop light timings.
 
@@ -20,7 +20,7 @@ Dimensions are  1x1, and cars are divided into two types: Social and Asocial (ap
 
 * Social
 
-Social cars (as the name implies) try to minimize their own negative effect on the road throughput. 
+Social cars (as the name implies) try to minimize their own negative effect on the road throughput.
 They will only change lanes when no car behind them will be forced to slow down.
 
 * Asocial
@@ -46,7 +46,7 @@ Cars begin the simulation with these initial parameters:
 * Random (normal distribution around road ideal speed) starting speed, equal to their maximum speed
 * Fixed per-step acceleration (currently fixed at 5m/s^2)
 * Fixed starting "patience" value, which determines how long they will wait before changing lanes (currently fixed at 0)
-* Target lane that they tend to lane change towards *(not currently active)*
+* Target lane that they tend to lane change towards **(not currently active)**
 
 ## Simulation step
 Each car step will proceed as follows, in order:
