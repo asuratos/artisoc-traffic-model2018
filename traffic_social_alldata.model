@@ -1148,7 +1148,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 626, 244, 1246, 113;
+    Display_Area = 1608, 240, 178, 630;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -1323,6 +1323,19 @@ Control_Panel {
         Slider_Value_Step = 0.1;
         Slider_Value = "3";
         Shortcut_Key = "";
+    }
+    Panel_Item {
+        Item_Type = Edit_Box;
+        Item_Name = "Ideal Speed";
+        Display_Area = 0, 0, 0, 0;
+        Font_Name = "";
+        Font_Char_Set = 0;
+        Font_Size = 0.0;
+        Font_Style = 0;
+        Font_Color = 0, 0, 0;
+        Font_Background_Color = 0, 0, 0;
+        Var_Name = "Universe.IdealSpeed";
+        Text_Data = "60.0";
     }
 }
 
