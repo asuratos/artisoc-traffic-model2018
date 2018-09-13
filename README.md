@@ -18,12 +18,12 @@ The number of cars on the road and the probability that a car will be asocial ca
 
 Dimensions are  1x1, and cars are divided into two types: Social and Asocial (apathetic).
 
-    + Social
+    * Social
 
 Social cars (as the name implies) try to minimize their own negative effect on the road throughput. 
 They will only change lanes when no car behind them will be forced to slow down.
 
-    + Asocial
+    * Asocial
 
 Asocial (apathetic) cars do not pay attention to their effect on the other cars on the road.
 They change lanes whenever they seen an opportunity to speed up, ignoring cars behind them.
