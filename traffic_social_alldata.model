@@ -241,7 +241,7 @@ My.Y = 0
 My.Direction = 90
 My.Target = Int(Rnd() * 3)
 
-My.patience = Universe.StartingPatience
+My.patience = Universe.StartingPatience	
 
 //Speeds are all expressed in km/hr. Universe.Scaling converts speeds to spaces/tick
 if Universe.RandomSpeeds then
