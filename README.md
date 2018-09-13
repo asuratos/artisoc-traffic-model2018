@@ -3,14 +3,14 @@
 Traffic model for the effect of lane changing on road throughput. New repository for MS2.
 
 # Simulation elements:
-* Road
+## Road
 
 The Space in which the simulation agents move and interact. 
 Road size is 3x300 where the length of a car is 1, and obeys cyclic boundary conditions. 
 Stop lights are placed at uniform intervals along the road.
 The user can define an Ideal speed for the road that determines the speed distribution of cars and the stop light timings.
 
-* Cars
+## Cars
 
 The primary agents used in the simulation.
 All cars have a maximum speed taken from a normal distribution centered at the simulation's ideal speed.
@@ -30,7 +30,7 @@ They change lanes whenever they seen an opportunity to speed up, ignoring cars b
 
 All cars attempt to accelerate to their ideal speed whenever possible.
 
-* Stop lights
+## Stop lights
 
 Placed in uniform intervals along the road.
 Cycles between "red" and "green" states, with the "green" state allowing cars to pass through.
