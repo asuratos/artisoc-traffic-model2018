@@ -26,10 +26,10 @@ They will only change lanes when no car behind them will be forced to slow down.
 * Asocial
 
 Asocial (apathetic) cars do not pay attention to their effect on the other cars on the road.
-They change lanes whenever they seen an opportunity to speed up, ignoring cars behind them.
+They change lanes whenever they see an opportunity to speed up, ignoring cars behind them.
 
 All cars attempt to accelerate to their ideal speed whenever possible.
-If a car is in the "recovering" state, their acceleration is reduced to 25% *(arbitrary value)*
+If a car is in the "recovering" state, their acceleration is reduced to 50% *(arbitrary value)*
 
 ## Stop lights
 
@@ -55,7 +55,7 @@ Each car step will proceed as follows, in order:
 
 1. If the car is not at its maximum speed, it will accelerate (increment its speed by its acceleration).
 
-    * If currently recovering, accelerate only by 25% of acceleration
+    * If currently recovering, accelerate only by 50% of acceleration
 
 2. Check its "headway" (open space ahead of them).
 
