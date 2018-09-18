@@ -84,18 +84,14 @@ Initial_Value {
     UNIVERSE.TARGETS = 1(0);
     UNIVERSE.ASOCIALRATE = 1(0.0);
     UNIVERSE.SLOWDOWN = 1(0.0);
-<<<<<<< HEAD
-    UNIVERSE.DATAPOINTS = 1(10000);
-=======
     UNIVERSE.DATAPOINTS = 1(100);
->>>>>>> cb4b5340aaa73fd9943593b7ed8324622e912b2a
     UNIVERSE.ASOCIALCOUNTOVERRIDE = 1(0);
     UNIVERSE.STOPSGAP = 1(30);
     UNIVERSE.LIGHTPERIOD = 1(100.0);
     UNIVERSE.RANDOMSPEEDS = 1(1);
     UNIVERSE.IDEALSPEED = 1(60.0);
     UNIVERSE.NUMWAVES = 1(2);
-    UNIVERSE.LIGHTACTIVETIME = 1(0.30000000000000004);
+    UNIVERSE.LIGHTACTIVETIME = 1(0.5);
     UNIVERSE.STARTINGPATIENCE = 1(0);
     UNIVERSE.RECORDDATA = 1(1);
 }
@@ -1175,7 +1171,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 211, 866, 1564, 121;
+    Display_Area = 142, 922, 1562, 113;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -1232,11 +1228,7 @@ Control_Panel {
         Font_Color = 0, 0, 0;
         Font_Background_Color = 0, 0, 0;
         Var_Name = "Universe.Datapoints";
-<<<<<<< HEAD
-        Text_Data = "10000";
-=======
         Text_Data = "100";
->>>>>>> cb4b5340aaa73fd9943593b7ed8324622e912b2a
     }
     Panel_Item {
         Item_Type = Drop_Down_List;
@@ -1325,7 +1317,7 @@ Control_Panel {
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
-        Slider_Value = "3";
+        Slider_Value = "5";
     }
     Panel_Item {
         Item_Type = Toggle;
@@ -1352,7 +1344,7 @@ Control_Panel {
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
-        Slider_Value = "3";
+        Slider_Value = "5";
         Shortcut_Key = "";
     }
     Panel_Item {
@@ -1443,7 +1435,7 @@ Network_Info {
 // Window Location Definition Division
 //-------------------------------------------------------
 Window_Rectangle {
-    Window_Name = Main_Window, -9, -9, 1938, 1058;
+    Window_Name = Main_Window, -8, -8, 1936, 1056;
     Window_Name = Output_Setting_Window, 743, 353, 480, 350;
     Window_Name = Artisoc_Help_Window, 10, 10, 400, 300;
 }
