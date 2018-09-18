@@ -84,7 +84,7 @@ Initial_Value {
     UNIVERSE.TARGETS = 1(0);
     UNIVERSE.ASOCIALRATE = 1(0.0);
     UNIVERSE.SLOWDOWN = 1(0.0);
-    UNIVERSE.DATAPOINTS = 1(1000);
+    UNIVERSE.DATAPOINTS = 1(10000);
     UNIVERSE.ASOCIALCOUNTOVERRIDE = 1(0);
     UNIVERSE.STOPSGAP = 1(30);
     UNIVERSE.LIGHTPERIOD = 1(100.0);
@@ -93,7 +93,7 @@ Initial_Value {
     UNIVERSE.NUMWAVES = 1(2);
     UNIVERSE.LIGHTACTIVETIME = 1(0.30000000000000004);
     UNIVERSE.STARTINGPATIENCE = 1(0);
-    UNIVERSE.RECORDDATA = 1(0);
+    UNIVERSE.RECORDDATA = 1(1);
 }
 
 
@@ -588,7 +588,7 @@ Single_Simulation {
     Step_Max = 0;
     Time_Max = 0;
     End_Condition = "";
-    Exec_Wait = 93;
+    Exec_Wait = 0;
     Exec_Wait_Max = 0;
     Random_Generator = Java_Standard;
     Exec_Order = Random;
@@ -1228,7 +1228,7 @@ Control_Panel {
         Font_Color = 0, 0, 0;
         Font_Background_Color = 0, 0, 0;
         Var_Name = "Universe.Datapoints";
-        Text_Data = "1000";
+        Text_Data = "10000";
     }
     Panel_Item {
         Item_Type = Drop_Down_List;
@@ -1340,7 +1340,7 @@ Control_Panel {
         Control_Off_Long = 0;
         Control_Off_Double = 0.0;
         Control_Off_String = "";
-        Toggle_Button_On = No;
+        Toggle_Button_On = Yes;
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
