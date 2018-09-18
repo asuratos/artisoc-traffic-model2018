@@ -31,9 +31,9 @@ UNIVERSE {
             Dim Startstep(0, 0) As Integer = (0);
             Dim TravelTime(0, 0) As Integer = (0);
             Dim PrevY(0, 0) As Integer = (0);
-            Dim Recovering(0, 0) As Integer = ();
-            Dim RecoveryTime(0, 0) As Integer = ();
-            Dim BaseAccel(0, 0) As Integer = ();
+            Dim Recovering(0, 0) As Integer = (0);
+            Dim RecoveryTime(0, 0) As Integer = (0);
+            Dim BaseAccel(0, 0) As Integer = (0);
         }
         AgtType Stoplight(0, 0)[0] {
             Dim ID(0, 0) As Integer = (0);
@@ -71,7 +71,7 @@ UNIVERSE {
     Dim LightActiveTime(0, 0) As Double = (0.0);
     Dim StartingPatience(0, 0) As Integer = (0);
     Dim RecordData(0, 0) As Boolean = (0);
-    Dim RandomRecoveryTime(0, 0) As Boolean = ();
+    Dim RandomRecoveryTime(0, 0) As Boolean = (0);
 }
 
 
@@ -84,7 +84,11 @@ Initial_Value {
     UNIVERSE.TARGETS = 1(0);
     UNIVERSE.ASOCIALRATE = 1(0.0);
     UNIVERSE.SLOWDOWN = 1(0.0);
+<<<<<<< HEAD
     UNIVERSE.DATAPOINTS = 1(10000);
+=======
+    UNIVERSE.DATAPOINTS = 1(100);
+>>>>>>> cb4b5340aaa73fd9943593b7ed8324622e912b2a
     UNIVERSE.ASOCIALCOUNTOVERRIDE = 1(0);
     UNIVERSE.STOPSGAP = 1(30);
     UNIVERSE.LIGHTPERIOD = 1(100.0);
@@ -312,7 +316,7 @@ nextred = 100
 
 //Acccelerate. If recovering from a previous deceleration, then acelerate carefully..
 if My.Recovering < My.RecoveryTime then
-	My.Accel = My.BaseAccel * 0.25
+	My.Accel = My.BaseAccel * 0.5
 	My.Recovering = My.Recovering +1
 else
 	My.Accel = My.BaseAccel
@@ -414,7 +418,7 @@ if My.Patience <= 0 and My.Speed > 20 then //if out of patience and in motion
 				//check behind before turning if Social
 				
 				//if Social and no space on the right, go straight
-				if (not My.ASocial) and BackDistR < 1 + (My.Speed/ Universe.Scaling) * 2 then
+				if (not My.ASocial) and BackDistR < 1 + (My.Speed/ Universe.Scaling) * 1.5 then
 					driveforward(NearDistM) 
 					
 				else
@@ -428,7 +432,7 @@ if My.Patience <= 0 and My.Speed > 20 then //if out of patience and in motion
 			else
 			
 				//if Social and no space on the left, go straight
-				if (not My.ASocial) and BackDistL < 1 + (My.Speed/ Universe.Scaling) * 2 then
+				if (not My.ASocial) and BackDistL < 1 + (My.Speed/ Universe.Scaling) * 1.5 then
 					driveforward(NearDistM)
 				else
 					//If ASocial or there IS space on the left, go left
@@ -1171,7 +1175,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 1674, 124, 207, 672;
+    Display_Area = 211, 866, 1564, 121;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -1228,7 +1232,11 @@ Control_Panel {
         Font_Color = 0, 0, 0;
         Font_Background_Color = 0, 0, 0;
         Var_Name = "Universe.Datapoints";
+<<<<<<< HEAD
         Text_Data = "10000";
+=======
+        Text_Data = "100";
+>>>>>>> cb4b5340aaa73fd9943593b7ed8324622e912b2a
     }
     Panel_Item {
         Item_Type = Drop_Down_List;
@@ -1435,7 +1443,7 @@ Network_Info {
 // Window Location Definition Division
 //-------------------------------------------------------
 Window_Rectangle {
-    Window_Name = Main_Window, -8, -8, 1936, 1056;
+    Window_Name = Main_Window, -9, -9, 1938, 1058;
     Window_Name = Output_Setting_Window, 743, 353, 480, 350;
     Window_Name = Artisoc_Help_Window, 10, 10, 400, 300;
 }
