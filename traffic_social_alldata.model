@@ -84,7 +84,7 @@ Initial_Value {
     UNIVERSE.TARGETS = 1(0);
     UNIVERSE.ASOCIALRATE = 1(0.0);
     UNIVERSE.SLOWDOWN = 1(0.0);
-    UNIVERSE.DATAPOINTS = 1(100);
+    UNIVERSE.DATAPOINTS = 1(1000);
     UNIVERSE.ASOCIALCOUNTOVERRIDE = 1(0);
     UNIVERSE.STOPSGAP = 1(30);
     UNIVERSE.LIGHTPERIOD = 1(100.0);
@@ -1171,7 +1171,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 142, 922, 1562, 113;
+    Display_Area = 72, 344, 1562, 113;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -1228,7 +1228,7 @@ Control_Panel {
         Font_Color = 0, 0, 0;
         Font_Background_Color = 0, 0, 0;
         Var_Name = "Universe.Datapoints";
-        Text_Data = "100";
+        Text_Data = "1000";
     }
     Panel_Item {
         Item_Type = Drop_Down_List;
@@ -1435,7 +1435,7 @@ Network_Info {
 // Window Location Definition Division
 //-------------------------------------------------------
 Window_Rectangle {
-    Window_Name = Main_Window, -8, -8, 1936, 1056;
+    Window_Name = Main_Window, 0, 0, 800, 700;
     Window_Name = Output_Setting_Window, 743, 353, 480, 350;
     Window_Name = Artisoc_Help_Window, 10, 10, 400, 300;
 }
