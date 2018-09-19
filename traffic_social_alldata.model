@@ -255,7 +255,7 @@ else
 end if
 
 My.Speed = My.MaxSpeed
-My.BaseAccel = 5//(Rnd() * 4) + 1
+My.BaseAccel = (Rnd() * 4) + 1
 My.Accel = My.BaseAccel
 
 // Recovery time is the number of seconds a car will have a reduced acceleration value.
@@ -310,7 +310,7 @@ dim nextred as integer
 
 nextred = 100
 
-//Acccelerate. If recovering from a previous deceleration, then acelerate carefully..
+//Acccelerate. If recovering from a previous deceleration, then acelerate carefully.
 if My.Recovering < My.RecoveryTime then
 	My.Accel = My.BaseAccel * 0.5
 	My.Recovering = My.Recovering +1
@@ -457,7 +457,7 @@ if My.Patience <= 0 and My.Speed > 20 then //if out of patience and in motion
 			end if
 		end if
 
-else//if on track for lane or target lanes are blocked
+else//if still patient or target lanes are blocked
 	driveforward(NearDistM)
 end if
 
@@ -1171,7 +1171,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 72, 344, 1562, 113;
+    Display_Area = 1686, 144, 218, 672;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -1435,7 +1435,7 @@ Network_Info {
 // Window Location Definition Division
 //-------------------------------------------------------
 Window_Rectangle {
-    Window_Name = Main_Window, 0, 0, 800, 700;
+    Window_Name = Main_Window, -8, -8, 1936, 1056;
     Window_Name = Output_Setting_Window, 743, 353, 480, 350;
     Window_Name = Artisoc_Help_Window, 10, 10, 400, 300;
 }
