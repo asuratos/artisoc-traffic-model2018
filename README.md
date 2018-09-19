@@ -45,9 +45,9 @@ Number of "Green Waves" and "green" signal active time are user-defined.
 Cars begin the simulation with these initial parameters:
 * Random (x,y) position on the road
 * Random (normal distribution around road ideal speed) starting speed, equal to their maximum speed
-* Fixed per-step acceleration (currently fixed at 5m/s^2)
+* Fixed per-step acceleration (currently randomized from 1-5 m/s^2)
 * Fixed recovery time that determines how long after a forced deceleration a car has stunted acceleration. (currently fixed at 10)
-* Fixed starting "patience" value, which determines how long they will wait before changing lanes **(currently fixed at 0)**
+* Fixed starting "patience" value, which determines how long they will wait before changing lanes **(currently fixed at 5)**
 * Target lane that they tend to lane change towards **(not currently active)**
 
 ## Simulation step
