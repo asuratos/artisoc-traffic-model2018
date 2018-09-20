@@ -5,3 +5,4 @@
 * Add patience mechanics
 * find research papers on patience in decision making
     * decision fatigue?
+* start plotting travel time histogram but divided by socialness
