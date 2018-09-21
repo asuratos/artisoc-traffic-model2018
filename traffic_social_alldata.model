@@ -85,7 +85,7 @@ Initial_Value {
     UNIVERSE.TARGETS = 1(0);
     UNIVERSE.ASOCIALRATE = 1(0.0);
     UNIVERSE.SLOWDOWN = 1(0.0);
-    UNIVERSE.DATAPOINTS = 1(100);
+    UNIVERSE.DATAPOINTS = 1(1000);
     UNIVERSE.ASOCIALCOUNTOVERRIDE = 1(0);
     UNIVERSE.STOPSGAP = 1(30);
     UNIVERSE.LIGHTPERIOD = 1(100.0);
@@ -214,7 +214,7 @@ RandomPutAgtSetCell(cars, False)
 Universe.FinishedCars = 0
 
 if Universe.RecordData then
-	OpenFileCSV("data\\output_" & Universe.StartingCars & "asocial" & Universe.ASocialrate &  ", " &Universe.Datapoints&"points.csv", 1, 2)	
+	OpenFileCSV("data\\output_" & Universe.StartingCars & "asocial" & Universe.ASocialrate &  ", " & Universe.Datapoints&"points.csv", 1, 2)	
 
 	WriteFileCSV(1, "Travel Time", False)
 	WriteFileCSV(1, "Max Speed", False)
@@ -389,7 +389,7 @@ end if
 MakeOneAgtSetAroundPositionCell(Cars, Universe.Road, My.X, My.Y - 3, 0, 3, Universe.Road.Car)
 If countagtset(Cars) <> 0 then
 	For each aCar in Cars//check cars behind
-	
+		
 		//car to the right
 		if aCar.X == My.X + 1 and aCar.Y <= My.Y and Abs(aCar.Y - My.Y) < BackDistR then
 			BackDistR = Abs(aCar.Y - My.Y)
@@ -1246,7 +1246,7 @@ Control_Panel {
         Font_Color = 0, 0, 0;
         Font_Background_Color = 0, 0, 0;
         Var_Name = "Universe.Datapoints";
-        Text_Data = "100";
+        Text_Data = "1000";
     }
     Panel_Item {
         Item_Type = Drop_Down_List;
@@ -1418,8 +1418,8 @@ Others_Data {
     Debug_Position_y = 75;
     Debug_Size_x = 400;
     Debug_Size_y = 200;
-    Console_Position_x = 332;
-    Console_Position_y = 378;
+    Console_Position_x = 144;
+    Console_Position_y = 172;
     Console_Size_x = 600;
     Console_Size_y = 452;
     Componen_Tree_Position_x = 2;
