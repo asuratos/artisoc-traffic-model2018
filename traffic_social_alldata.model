@@ -72,6 +72,7 @@ UNIVERSE {
     Dim StartingPatience(0, 0) As Integer = (0);
     Dim RecordData(0, 0) As Boolean = (0);
     Dim RandomRecoveryTime(0, 0) As Boolean = (0);
+    Dim MaxCars(0, 0) As Integer = ();
 }
 
 
@@ -79,12 +80,12 @@ UNIVERSE {
 // Agent Variable Initial Data
 //-------------------------------------------------------
 Initial_Value {
-    UNIVERSE.STARTINGCARS = 1(50);
+    UNIVERSE.STARTINGCARS = 1(10);
     UNIVERSE.SCALING = 1(18.0);
     UNIVERSE.TARGETS = 1(0);
     UNIVERSE.ASOCIALRATE = 1(0.0);
     UNIVERSE.SLOWDOWN = 1(0.0);
-    UNIVERSE.DATAPOINTS = 1(1000);
+    UNIVERSE.DATAPOINTS = 1(100);
     UNIVERSE.ASOCIALCOUNTOVERRIDE = 1(0);
     UNIVERSE.STOPSGAP = 1(30);
     UNIVERSE.LIGHTPERIOD = 1(100.0);
@@ -94,6 +95,7 @@ Initial_Value {
     UNIVERSE.LIGHTACTIVETIME = 1(0.5);
     UNIVERSE.STARTINGPATIENCE = 1(0);
     UNIVERSE.RECORDDATA = 1(1);
+    UNIVERSE.MAXCARS = 1(0);
 }
 
 
@@ -145,7 +147,7 @@ if Universe.FinishedCars > Universe.Datapoints then
 
 	if Universe.ASocialcountoverride == 0 then
 		if Universe.ASocialrate >= 0.999 then
-			if Universe.StartingCars == 200 then
+			if Universe.StartingCars == Universe.MaxCars then
 				ExitSimulationMsgLn("ALL Completed")
 			else
 				Universe.StartingCars = Universe.StartingCars + 10
@@ -155,7 +157,7 @@ if Universe.FinishedCars > Universe.Datapoints then
 			Universe.ASocialrate = Universe.ASocialrate + 0.1
 		end if
 	else
-		if Universe.StartingCars == 200 then
+		if Universe.StartingCars == Universe.MaxCars then
 			ExitSimulationMsgLn("ALL Completed with exactly " & Universe.ASocialcountoverride & " ASocial car(s)")
 		else
 			Universe.StartingCars = Universe.StartingCars + 10
@@ -1171,7 +1173,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 1686, 144, 218, 672;
+    Display_Area = 1692, 120, 214, 746;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -1187,7 +1189,23 @@ Control_Panel {
         Slider_Range_Max = 19;
         Slider_Value_Min = 10.0;
         Slider_Value_Step = 10.0;
-        Slider_Value = "4";
+        Slider_Value = "0";
+    }
+    Panel_Item {
+        Item_Type = Slider;
+        Item_Name = "Maximum cars";
+        Display_Area = 0, 0, 0, 0;
+        Font_Name = "";
+        Font_Char_Set = 0;
+        Font_Size = 0.0;
+        Font_Style = 0;
+        Font_Color = 0, 0, 0;
+        Font_Background_Color = 0, 0, 0;
+        Var_Name = "Universe.MaxCars";
+        Slider_Range_Max = 20;
+        Slider_Value_Min = 100.0;
+        Slider_Value_Step = 10.0;
+        Slider_Value = "20";
     }
     Panel_Item {
         Item_Type = Toggle;
@@ -1211,10 +1229,10 @@ Control_Panel {
         Control_Off_Double = 0.0;
         Control_Off_String = "";
         Toggle_Button_On = No;
-        Slider_Range_Max = 19;
-        Slider_Value_Min = 10.0;
+        Slider_Range_Max = 20;
+        Slider_Value_Min = 100.0;
         Slider_Value_Step = 10.0;
-        Slider_Value = "4";
+        Slider_Value = "20";
         Shortcut_Key = "";
     }
     Panel_Item {
@@ -1228,7 +1246,7 @@ Control_Panel {
         Font_Color = 0, 0, 0;
         Font_Background_Color = 0, 0, 0;
         Var_Name = "Universe.Datapoints";
-        Text_Data = "1000";
+        Text_Data = "100";
     }
     Panel_Item {
         Item_Type = Drop_Down_List;
@@ -1400,8 +1418,8 @@ Others_Data {
     Debug_Position_y = 75;
     Debug_Size_x = 400;
     Debug_Size_y = 200;
-    Console_Position_x = 74;
-    Console_Position_y = 446;
+    Console_Position_x = 332;
+    Console_Position_y = 378;
     Console_Size_x = 600;
     Console_Size_y = 452;
     Componen_Tree_Position_x = 2;
