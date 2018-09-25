@@ -72,7 +72,7 @@ UNIVERSE {
     Dim StartingPatience(0, 0) As Integer = (0);
     Dim RecordData(0, 0) As Boolean = (0);
     Dim RandomRecoveryTime(0, 0) As Boolean = (0);
-    Dim MaxCars(0, 0) As Integer = ();
+    Dim MaxCars(0, 0) As Integer = (0);
 }
 
 
@@ -247,51 +247,7 @@ My.Y = 0
 My.Direction = 90
 My.Target = Int(Rnd() * 3)
 
-My.patience = Universe.StartingPatience	
-
-//Speeds are all expressed in km/hr. Universe.Scaling converts speeds to spaces/tick
-if Universe.RandomSpeeds then
-	My.MaxSpeed = NormInv(Rnd(), Universe.IdealSpeed, 5)
-else
-	My.MaxSpeed = Universe.IdealSpeed
-end if
-
-My.Speed = My.MaxSpeed
-My.BaseAccel = 5// (Rnd() * 4) + 1
-My.Accel = My.BaseAccel
-
-// Recovery time is the number of seconds a car will have a reduced acceleration value.
-if Universe.RandomRecoveryTime then
-	My.RecoveryTime = int(Rnd() * 10)
-else
-	My.RecoveryTime = 5
-end if
-
-//A car is in the "recovering" state when my.recovering != my.RecoveryTime
-My.Recovering = My.RecoveryTime
-
-My.LaneChangeCount = 0
-
-My.Startstep = GetCountStep()
-
-if Universe.ASocialcountoverride == 0 then
-	if Rnd() < Universe.ASocialrate then
-		My.ASocial = True
-		My.Status = Color_black
-	else
-		My.ASocial = False
-		My.Status = Color_green
-	end if
-	
-elseif Universe.ASocialcars < Universe.ASocialcountoverride then
-	My.ASocial = True
-	My.Status = color_black
-	Universe.ASocialcars = Universe.ASocialcars + 1
-	
-else
-	My.ASocial = False
-	My.Status = Color_green
-end if
+reinitialize()
 }
 
 Agt_Step{
@@ -543,10 +499,59 @@ sub report(){
 			Universe.FinishedCars = Universe.FinishedCars + 1
 		end if
 
-		My.Startstep = GetCountStep()
-		My.LaneChangeCount = 0
-		My.Patience = Universe.StartingPatience
+// -------------------REINITIALIZE VALUES-------------------
+		reinitialize()
+		
 	end if
+}
+
+sub reinitialize(){
+
+My.Startstep = GetCountStep()
+My.LaneChangeCount = 0
+My.Patience = Universe.StartingPatience
+
+
+//Speeds are all expressed in km/hr. Universe.Scaling converts speeds to spaces/tick (1 space = 5 m, 1 tick = 1 second)
+if Universe.RandomSpeeds then
+	My.MaxSpeed = NormInv(Rnd(), Universe.IdealSpeed, 5)
+else
+	My.MaxSpeed = Universe.IdealSpeed
+end if
+
+My.Speed = My.MaxSpeed
+My.BaseAccel = 5// (Rnd() * 4) + 1
+My.Accel = My.BaseAccel
+
+// Recovery time is the number of seconds a car will have a reduced acceleration value.
+if Universe.RandomRecoveryTime then
+	My.RecoveryTime = int(Rnd() * 10)
+else
+	My.RecoveryTime = 5
+end if
+
+//A car is in the "recovering" state when my.recovering != my.RecoveryTime
+My.Recovering = My.RecoveryTime
+
+//roll to see if asocial
+if Universe.ASocialcountoverride == 0 then
+	if Rnd() < Universe.ASocialrate then
+		My.ASocial = True
+		My.Status = Color_black
+	else
+		My.ASocial = False
+		My.Status = Color_green
+	end if
+	
+elseif Universe.ASocialcars < Universe.ASocialcountoverride then
+	My.ASocial = True
+	My.Status = color_black
+	Universe.ASocialcars = Universe.ASocialcars + 1
+	
+else
+	My.ASocial = False
+	My.Status = Color_green
+end if
 }
 #end_rule UNIVERSE.ROAD.CAR
 
@@ -622,7 +627,7 @@ Map_Output {
     Title = "Road 1";
     Disable = No;
     Background_Color = 255, 255, 255;
-    Position_x = 816;
+    Position_x = 814;
     Position_y = 6;
     Size_x = 129;
     Size_y = 916;
@@ -1173,7 +1178,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 1692, 120, 214, 746;
+    Display_Area = 136, 870, 1705, 113;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -1205,7 +1210,7 @@ Control_Panel {
         Slider_Range_Max = 20;
         Slider_Value_Min = 100.0;
         Slider_Value_Step = 10.0;
-        Slider_Value = "20";
+        Slider_Value = "0";
     }
     Panel_Item {
         Item_Type = Toggle;
@@ -1232,7 +1237,7 @@ Control_Panel {
         Slider_Range_Max = 20;
         Slider_Value_Min = 100.0;
         Slider_Value_Step = 10.0;
-        Slider_Value = "20";
+        Slider_Value = "0";
         Shortcut_Key = "";
     }
     Panel_Item {
