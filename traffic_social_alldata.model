@@ -34,6 +34,10 @@ UNIVERSE {
             Dim Recovering(0, 0) As Integer = (0);
             Dim RecoveryTime(0, 0) As Integer = (0);
             Dim BaseAccel(0, 0) As Integer = (0);
+            Dim PrevFrontDists(0, 0)[3] As Double = ();
+            Dim PrevBackDists(0, 0)[2] As Double = ();
+            Dim FrontDists(0, 0)[3] As Integer = ();
+            Dim BackDists(0, 0)[2] As Integer = ();
         }
         AgtType Stoplight(0, 0)[0] {
             Dim ID(0, 0) As Integer = (0);
@@ -80,7 +84,7 @@ UNIVERSE {
 // Agent Variable Initial Data
 //-------------------------------------------------------
 Initial_Value {
-    UNIVERSE.STARTINGCARS = 1(10);
+    UNIVERSE.STARTINGCARS = 1(90);
     UNIVERSE.SCALING = 1(18.0);
     UNIVERSE.TARGETS = 1(0);
     UNIVERSE.ASOCIALRATE = 1(0.0);
@@ -92,9 +96,9 @@ Initial_Value {
     UNIVERSE.RANDOMSPEEDS = 1(1);
     UNIVERSE.IDEALSPEED = 1(60.0);
     UNIVERSE.NUMWAVES = 1(2);
-    UNIVERSE.LIGHTACTIVETIME = 1(0.5);
+    UNIVERSE.LIGHTACTIVETIME = 1(1.0);
     UNIVERSE.STARTINGPATIENCE = 1(0);
-    UNIVERSE.RECORDDATA = 1(1);
+    UNIVERSE.RECORDDATA = 1(0);
     UNIVERSE.MAXCARS = 1(300);
 }
 
@@ -191,10 +195,6 @@ Universe.ASocialrate = ASocialrate
 
 Universe.ASocialcars = 0 
 
-for i=0 to Universe.StartingCars - 1
-	CreateAgt(Universe.Road.Car)
-next i
-
 //--------------------------------------------Stoplight Creation Block------------------------------------
 Universe.LightPeriod = GetheightSpace(Universe.Road) / ((Universe.IdealSpeed / Universe.Scaling) * Universe.NumWaves)
 
@@ -207,6 +207,10 @@ for i = 1 to Round(GetHeightSpace(Universe.Road) / Universe.StopsGap)
 	next j
 next i
 
+
+for i=0 to Universe.StartingCars - 1
+	CreateAgt(Universe.Road.Car)
+next i
 
 MakeAgtSet(cars, Universe.Road.Car)
 RandomPutAgtSetCell(cars, False)
@@ -252,22 +256,6 @@ reinitialize()
 
 Agt_Step{
 
-dim Cars as agtset
-dim aCar as agt
-dim Lights as agtset
-dim Light as agt
-dim NearDistL as double
-dim NearDistM as double
-dim NearDistR as double
-dim BackDistL as double
-dim BackDistR as double
-dim BottomCars as agtset
-dim pressure as double
-dim traveltime as integer
-dim nextred as integer
-
-nextred = 100
-
 //Acccelerate. If recovering from a previous deceleration, then acelerate carefully.
 if My.Recovering < My.RecoveryTime then
 	My.Accel = My.BaseAccel * 0.5
@@ -284,140 +272,73 @@ if My.Speed < My.MaxSpeed then
 end if
 
 //look ahead
-
-//-------------------------------LOOK AT STREET LIGHTS HERE-------------------------------------------------
-nextred = Universe.StopsGap - (My.Y mod Universe.StopsGap)
-
-MakeOneAgtSetAroundPositionCell(Lights, Universe.Road, 1, My.Y + nextred, 0, 2, Universe.Road.Stoplight)
-Light = GetAgt(Lights, 0)
-if Light.Color == Color_Green then
-	nextred = 100
-end if
-
-//initialize nearest distances (make the max = distance to next traffic light)
-NearDistM = nextred
-if My.X == 0 then
-	NearDistL = 0
-	NearDistR = nextred
-	BackDistL = 0
-	BackdistR = 100
-elseif My.X == 2 then
-	NearDistR = 0
-	NearDistL = nextred
-	BackDistL = 100
-	BackdistR = 0
-else
-	NearDistR = nextred
-	NearDistL = nextred
-	BackDistL = 100
-	BackdistR = 100
-end if
-
-
-//-------------------------------------------LOOK AHEAD---------------------------------------------
-MakeOneAgtSetAroundPositionCell(Cars, Universe.Road, My.X, My.Y + 3, 0, 2, Universe.Road.Car)
-If countagtset(Cars) <> 0 then
-	For each aCar in Cars//check cars ahead
-		
-		//car in front
-		if aCar.X == My.X and aCar.Y >= My.Y and aCar.Y - My.Y < NearDistM then
-			NearDistM = aCar.Y - My.Y
-		elseif aCar.X == My.X and aCar.Y + GetHeightSpace(Universe.Road) >= My.Y and aCar.Y + GetHeightSpace(Universe.Road) - My.Y < NearDistM then
-			NearDistM = aCar.Y + GetHeightSpace(Universe.Road) - My.Y
-		
-		//car to the right
-		elseif aCar.X == My.X + 1 and aCar.Y >= My.Y and aCar.Y - My.Y < NearDistR then
-			NearDistR = aCar.Y - My.Y
-		elseif aCar.X == My.X + 1 and aCar.Y + GetHeightSpace(Universe.Road) >= My.Y and aCar.Y + GetHeightSpace(Universe.Road) - My.Y < NearDistR then
-			NearDistR = aCar.Y + GetHeightSpace(Universe.Road) - My.Y
-		
-		//car to the left
-		elseif aCar.X == My.X - 1 and aCar.Y >= My.Y and aCar.Y - My.Y < NearDistL then
-			NearDistL = aCar.Y - My.Y
-		elseif aCar.X == My.X - 1 and aCar.Y + GetHeightSpace(Universe.Road) >= My.Y and aCar.Y + GetHeightSpace(Universe.Road) - My.Y < NearDistL then
-			NearDistL = aCar.Y + GetHeightSpace(Universe.Road) - My.Y
-		
-		end if
-	next aCar
-end if
-
-//------------------------------------------------LOOK BEHIND----------------------------------------
-MakeOneAgtSetAroundPositionCell(Cars, Universe.Road, My.X, My.Y - 3, 0, 3, Universe.Road.Car)
-If countagtset(Cars) <> 0 then
-	For each aCar in Cars//check cars behind
-		
-		//car to the right
-		if aCar.X == My.X + 1 and aCar.Y <= My.Y and Abs(aCar.Y - My.Y) < BackDistR then
-			BackDistR = Abs(aCar.Y - My.Y)
-		elseif aCar.X == My.X + 1 and aCar.Y <= My.Y  + GetHeightSpace(Universe.Road) and My.Y + GetHeightSpace(Universe.Road) - aCar.Y < BackDistR then
-			BackDistR = My.Y + GetHeightSpace(Universe.Road) - aCar.Y  
-		
-		//car to the left
-		elseif aCar.X == My.X - 1 and aCar.Y <= My.Y and Abs(aCar.Y - My.Y) < NearDistL then
-			BackDistL = Abs(aCar.Y - My.Y)
-		elseif aCar.X == My.X - 1 and aCar.Y <= My.Y  + GetHeightSpace(Universe.Road) and My.Y + GetHeightSpace(Universe.Road) - aCar.Y  < BackDistL then
-			BackDistL = My.Y + GetHeightSpace(Universe.Road) - aCar.Y  
-		
-		end if
-	next aCar
-end if
-
+lookaround()
 
 //----------- LANE CHANGING BLOCK ----------------
 if My.Patience <= 0 and My.Speed > 20 then //if out of patience and in motion
 
 		//change lanes to the most open
-		if NearDistR > NearDistM then
-			if NearDistR > NearDistL then
+		if My.PrevFrontDists(2) > My.PrevFrontDists(1) then
+			if My.PrevFrontDists(2) > My.PrevFrontDists(0) then
 				//check behind before turning if Social
 				
 				//if Social and no space on the right, go straight
-				if (not My.ASocial) and BackDistR < 1 + (My.Speed/ Universe.Scaling) * 1.5 then
-					driveforward(NearDistM) 
+				if (not My.ASocial) and My.PrevBackDists(1) < 1 + (My.Speed/ Universe.Scaling) * 1.5 then
+					driveforward(My.PrevFrontDists(1)) 
 					
 				else
 					//If ASocial or there IS space on the right, go right
 					//My.Speed = My.Speed * Universe.Slowdown
 					My.X = My.X + 1
 					My.LaneChangeCount = My.LaneChangeCount + 1
-					driveforward(NearDistR)
+					driveforward(My.PrevFrontDists(2))
 					My.patience = Universe.StartingPatience
 				end if
 			else
 			
 				//if Social and no space on the left, go straight
-				if (not My.ASocial) and BackDistL < 1 + (My.Speed/ Universe.Scaling) * 1.5 then
-					driveforward(NearDistM)
+				if (not My.ASocial) and My.PrevBackDists(0) < 1 + (My.Speed/ Universe.Scaling) * 1.5 then
+					driveforward(My.PrevFrontDists(1))
 				else
 					//If ASocial or there IS space on the left, go left
 					//My.Speed = My.Speed * Universe.Slowdown
 					My.X = My.X - 1
 					My.LaneChangeCount = My.LaneChangeCount + 1
-					driveforward(NearDistL)
+					driveforward(My.PrevFrontDists(0))
 					My.patience = Universe.StartingPatience
 				end if
 			end if
-		elseif NearDistM > NearDistL then
+		elseif My.PrevFrontDists(1) > My.PrevFrontDists(0) then
 			//go straight
-			driveforward(NearDistM)
+			driveforward(My.PrevFrontDists(1))
 		else
 			//if Social and no space on the left, go straight
-			if (not My.ASocial) and BackDistL < 1 + (My.Speed/ Universe.Scaling) then
-				driveforward(NearDistM)
+			if (not My.ASocial) and My.PrevBackDists(0) < 1 + (My.Speed/ Universe.Scaling) then
+				driveforward(My.PrevFrontDists(1))
 			else
 				//If ASocial or there IS space on the left, go left
 				//go left
 				//My.Speed = My.Speed * Universe.Slowdown
 				My.X = My.X - 1
 				My.LaneChangeCount = My.LaneChangeCount + 1
-				driveforward(NearDistL)
+				driveforward(My.PrevFrontDists(0))
 				My.patience = Universe.StartingPatience
 			end if
 		end if
 
 else//if still patient or target lanes are blocked
-	driveforward(NearDistM)
+	driveforward(My.PrevFrontDists(1))
 end if
+
+dim i as integer 
+
+for i = 0 to 2
+	My.PrevFrontDists(i) = My.FrontDists(i)
+Next i
+
+for i = 0 to 1
+	My.PrevBackDists(i) = My.BackDists(i)
+Next i
 
 }
 
@@ -505,6 +426,8 @@ sub report(){
 	end if
 }
 
+
+
 sub reinitialize(){
 
 My.Startstep = GetCountStep()
@@ -552,6 +475,108 @@ else
 	My.ASocial = False
 	My.Status = Color_green
 end if
+
+lookaround()
+
+dim i as integer
+
+for i = 0 to 2
+	My.PrevFrontDists(i) = My.FrontDists(i)
+Next i
+
+for i = 0 to 1
+	My.PrevBackDists(i) = My.BackDists(i)
+Next i
+}
+
+
+sub lookaround(){
+
+dim Cars as agtset
+dim aCar as agt
+dim Lights as agtset
+dim Light as agt
+dim nextred as double
+
+nextred = 100
+
+//-------------------------------LOOK AT STREET LIGHTS HERE-------------------------------------------------
+nextred = Universe.StopsGap - (My.Y mod Universe.StopsGap)
+
+MakeOneAgtSetAroundPositionCell(Lights, Universe.Road, 1, My.Y + nextred, 0, 2, Universe.Road.Stoplight)
+Light = GetAgt(Lights, 0)
+if Light.Color == Color_Green then
+	nextred = 100
+end if
+
+//initialize nearest distances (make the max = distance to next traffic light)
+My.FrontDists(1) = nextred
+if My.X == 0 then
+	My.FrontDists(0) = 0
+	My.FrontDists(2) = nextred
+	My.BackDists(0) = 0
+	My.BackDists(1) = 100
+elseif My.X == 2 then
+	My.FrontDists(2) = 0
+	My.FrontDists(0) = nextred
+	My.BackDists(0) = 100
+	My.BackDists(1) = 0
+else
+	My.FrontDists(2) = nextred
+	My.FrontDists(0) = nextred
+	My.BackDists(0) = 100
+	My.BackDists(1) = 100
+end if
+
+
+//-------------------------------------------LOOK AHEAD---------------------------------------------
+MakeOneAgtSetAroundPositionCell(Cars, Universe.Road, My.X, My.Y + 3, 0, 2, Universe.Road.Car)
+If countagtset(Cars) <> 0 then
+	For each aCar in Cars//check cars ahead
+		
+		//car in front
+		if aCar.X == My.X and aCar.Y >= My.Y and aCar.Y - My.Y < My.FrontDists(1) then
+			My.FrontDists(1) = aCar.Y - My.Y
+		elseif aCar.X == My.X and aCar.Y + GetHeightSpace(Universe.Road) >= My.Y and aCar.Y + GetHeightSpace(Universe.Road) - My.Y < My.FrontDists(1) then
+			My.FrontDists(1) = aCar.Y + GetHeightSpace(Universe.Road) - My.Y
+		
+		//car to the right
+		elseif aCar.X == My.X + 1 and aCar.Y >= My.Y and aCar.Y - My.Y < My.FrontDists(2) then
+			My.FrontDists(2) = aCar.Y - My.Y
+		elseif aCar.X == My.X + 1 and aCar.Y + GetHeightSpace(Universe.Road) >= My.Y and aCar.Y + GetHeightSpace(Universe.Road) - My.Y < My.FrontDists(2) then
+			My.FrontDists(2) = aCar.Y + GetHeightSpace(Universe.Road) - My.Y
+		
+		//car to the left
+		elseif aCar.X == My.X - 1 and aCar.Y >= My.Y and aCar.Y - My.Y < My.FrontDists(0) then
+			My.FrontDists(0) = aCar.Y - My.Y
+		elseif aCar.X == My.X - 1 and aCar.Y + GetHeightSpace(Universe.Road) >= My.Y and aCar.Y + GetHeightSpace(Universe.Road) - My.Y < My.FrontDists(0) then
+			My.FrontDists(0) = aCar.Y + GetHeightSpace(Universe.Road) - My.Y
+		
+		end if
+	next aCar
+end if
+
+
+//------------------------------------------------LOOK BEHIND----------------------------------------
+MakeOneAgtSetAroundPositionCell(Cars, Universe.Road, My.X, My.Y - 3, 0, 3, Universe.Road.Car)
+If countagtset(Cars) <> 0 then
+	For each aCar in Cars//check cars behind
+		
+		//car to the right
+		if aCar.X == My.X + 1 and aCar.Y <= My.Y and Abs(aCar.Y - My.Y) < My.BackDists(1) then
+			My.BackDists(1) = Abs(aCar.Y - My.Y)
+		elseif aCar.X == My.X + 1 and aCar.Y <= My.Y  + GetHeightSpace(Universe.Road) and My.Y + GetHeightSpace(Universe.Road) - aCar.Y < My.BackDists(1) then
+			My.BackDists(1) = My.Y + GetHeightSpace(Universe.Road) - aCar.Y  
+		
+		//car to the left
+		elseif aCar.X == My.X - 1 and aCar.Y <= My.Y and Abs(aCar.Y - My.Y) < My.FrontDists(0) then
+			My.BackDists(0) = Abs(aCar.Y - My.Y)
+		elseif aCar.X == My.X - 1 and aCar.Y <= My.Y  + GetHeightSpace(Universe.Road) and My.Y + GetHeightSpace(Universe.Road) - aCar.Y  < My.BackDists(0) then
+			My.BackDists(0) = My.Y + GetHeightSpace(Universe.Road) - aCar.Y  
+		
+		end if
+	next aCar
+end if
 }
 #end_rule UNIVERSE.ROAD.CAR
 
@@ -595,7 +620,7 @@ Single_Simulation {
     Step_Max = 0;
     Time_Max = 0;
     End_Condition = "";
-    Exec_Wait = 0;
+    Exec_Wait = 93;
     Exec_Wait_Max = 0;
     Random_Generator = Java_Standard;
     Exec_Order = Random;
@@ -1178,7 +1203,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 136, 870, 1705, 113;
+    Display_Area = 70, 908, 1705, 113;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -1194,7 +1219,7 @@ Control_Panel {
         Slider_Range_Max = 19;
         Slider_Value_Min = 10.0;
         Slider_Value_Step = 10.0;
-        Slider_Value = "0";
+        Slider_Value = "8";
     }
     Panel_Item {
         Item_Type = Slider;
@@ -1340,7 +1365,7 @@ Control_Panel {
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
-        Slider_Value = "5";
+        Slider_Value = "10";
     }
     Panel_Item {
         Item_Type = Toggle;
@@ -1363,11 +1388,11 @@ Control_Panel {
         Control_Off_Long = 0;
         Control_Off_Double = 0.0;
         Control_Off_String = "";
-        Toggle_Button_On = Yes;
+        Toggle_Button_On = No;
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
-        Slider_Value = "5";
+        Slider_Value = "10";
         Shortcut_Key = "";
     }
     Panel_Item {
