@@ -79,8 +79,8 @@ UNIVERSE {
     Dim MaxCars(0, 0) As Integer = (0);
     Dim DumpSpeeds(0, 0) As Boolean = (0);
     Dim SpeedPoints(0, 0) As Integer = (0);
-    Dim SpaceScaling(0, 0) As Double = ();
-    Dim TimeScaling(0, 0) As Double = ();
+    Dim SpaceScaling(0, 0) As Double = (0.0);
+    Dim TimeScaling(0, 0) As Double = (0.0);
 }
 
 
@@ -88,7 +88,7 @@ UNIVERSE {
 // Agent Variable Initial Data
 //-------------------------------------------------------
 Initial_Value {
-    UNIVERSE.STARTINGCARS = 1(300);
+    UNIVERSE.STARTINGCARS = 1(220);
     UNIVERSE.SCALING = 1(36.0);
     UNIVERSE.TARGETS = 1(0);
     UNIVERSE.ASOCIALRATE = 1(0.0);
@@ -105,7 +105,7 @@ Initial_Value {
     UNIVERSE.STARTINGPATIENCE = 1(10);
     UNIVERSE.RECORDDATA = 1(0);
     UNIVERSE.MAXCARS = 1(300);
-    UNIVERSE.DUMPSPEEDS = 1(1);
+    UNIVERSE.DUMPSPEEDS = 1(0);
     UNIVERSE.SPEEDPOINTS = 1(100);
 }
 
@@ -737,10 +737,10 @@ Map_Output {
     Title = "Road 1";
     Disable = No;
     Background_Color = 255, 255, 255;
-    Position_x = 814;
-    Position_y = 6;
+    Position_x = 774;
+    Position_y = 4;
     Size_x = 129;
-    Size_y = 916;
+    Size_y = 721;
     Map_Cell_Size = 2;
     Remarks = No;
     Legend_Pos = Top;
@@ -1073,10 +1073,10 @@ Map_Output {
     Title = "Road 2";
     Disable = No;
     Background_Color = 255, 255, 255;
-    Position_x = 986;
-    Position_y = 6;
+    Position_x = 879;
+    Position_y = 3;
     Size_x = 129;
-    Size_y = 916;
+    Size_y = 724;
     Map_Cell_Size = 2;
     Remarks = No;
     Legend_Pos = Top;
@@ -1183,10 +1183,10 @@ Map_Output {
     Title = "Road 3";
     Disable = No;
     Background_Color = 255, 255, 255;
-    Position_x = 1154;
+    Position_x = 1004;
     Position_y = 4;
     Size_x = 129;
-    Size_y = 916;
+    Size_y = 724;
     Map_Cell_Size = 2;
     Remarks = No;
     Legend_Pos = Top;
@@ -1288,7 +1288,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = -20, 792, 1940, 113;
+    Display_Area = 216, 202, 334, 463;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -1304,7 +1304,7 @@ Control_Panel {
         Slider_Range_Max = 29;
         Slider_Value_Min = 10.0;
         Slider_Value_Step = 10.0;
-        Slider_Value = "29";
+        Slider_Value = "21";
     }
     Panel_Item {
         Item_Type = Slider;
@@ -1514,7 +1514,7 @@ Control_Panel {
         Control_Off_Long = 0;
         Control_Off_Double = 0.0;
         Control_Off_String = "";
-        Toggle_Button_On = Yes;
+        Toggle_Button_On = No;
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
@@ -1609,8 +1609,8 @@ Network_Info {
 // Window Location Definition Division
 //-------------------------------------------------------
 Window_Rectangle {
-    Window_Name = Main_Window, -8, -8, 1936, 1056;
-    Window_Name = Output_Setting_Window, 743, 353, 480, 350;
+    Window_Name = Main_Window, -8, -8, 1552, 848;
+    Window_Name = Output_Setting_Window, 551, 249, 480, 350;
     Window_Name = Artisoc_Help_Window, 10, 10, 400, 300;
 }
 
