@@ -34,10 +34,9 @@ UNIVERSE {
             Dim Recovering(0, 0) As Integer = (0);
             Dim RecoveryTime(0, 0) As Integer = (0);
             Dim BaseAccel(0, 0) As Integer = (0);
-            Dim PrevFrontDists(0, 0)[3] As Double = (3*0.0);
-            Dim PrevBackDists(0, 0)[2] As Double = (2*0.0);
-            Dim FrontDists(0, 0)[3] As Integer = (3*0);
-            Dim BackDists(0, 0)[2] As Integer = (2*0);
+            Dim FrontDists(0, 0) <3> [3] As Integer = (3*0);
+            Dim BackDists(0, 0) <3> [2] As Integer = (2*0);
+            Dim ReactionTime(0, 0) As Integer = ();
         }
         AgtType Stoplight(0, 0)[0] {
             Dim ID(0, 0) As Integer = (0);
@@ -339,11 +338,11 @@ lookaround()
 if My.Patience <= 0 and  GetHistory(My.Speed, 1) <> 0 then //if out of patience and in motion
 
 	//if front is more open than left
-	if My.PrevFrontDists(1) >= My.PrevFrontDists(0) then
+	if GetHistory(My.FrontDists(1), My.ReactionTime) >= GetHistory(My.FrontDists(0), My.ReactionTime) then
 
 		//if front is also more open than right
-		if My.PrevFrontDists(1) >= My.PrevFrontDists(2) then
-			driveforward(My.PrevFrontDists(1))
+		if GetHistory(My.FrontDists(1), My.ReactionTime) >= GetHistory(My.FrontDists(2), My.ReactionTime) then
+			driveforward(GetHistory(My.FrontDists(1), My.ReactionTime))
 
 		else
 			//therefore right is most open, now check if asocial
@@ -351,41 +350,41 @@ if My.Patience <= 0 and  GetHistory(My.Speed, 1) <> 0 then //if out of patience 
 				My.X = My.X + 1
 				My.LaneChangeCount = My.LaneChangeCount + 1
 				My.patience = Universe.StartingPatience
-				driveforward(My.PrevFrontDists(2))
+				driveforward(GetHistory(My.FrontDists(2), My.ReactionTime))
 
 			//if social with space behind
-			elseif My.PrevBackDists(1) < 1 + (My.Speed/Universe.Scaling) then
+			elseif GetHistory(My.BackDists(1), My.ReactionTime) < 1 + (My.Speed/Universe.Scaling) then
 				My.X = My.X + 1
 				My.LaneChangeCount = My.LaneChangeCount + 1
 				My.patience = Universe.StartingPatience
-				driveforward(My.PrevFrontDists(2))
+				driveforward(GetHistory(My.FrontDists(2), My.ReactionTime))
 
 			//if social with no space behind, go forward
 			else
-				driveforward(My.PrevFrontDists(1))
+				driveforward(GetHistory(My.FrontDists(1), My.ReactionTime))
 			end if
 		end if
 
 	//then left has more space than ahead. Check if left is also more than right.
-	elseif My.PrevFrontDists(0) > My.PrevFrontDists(2) then
+	elseif GetHistory(My.FrontDists(0), My.ReactionTime) > GetHistory(My.FrontDists(2), My.ReactionTime) then
 
 		//check if ASocial
   	if My.ASocial then
 			My.X = My.X - 1
 			My.LaneChangeCount = My.LaneChangeCount + 1
 			My.patience = Universe.StartingPatience
-			driveforward(My.PrevFrontDists(0))
+			driveforward(GetHistory(My.FrontDists(0), My.ReactionTime))
 
     //if social with space behind
-    elseif My.PrevBackDists(0) < 1 + (My.Speed/Universe.Scaling) then
+    elseif GetHistory(My.BackDists(0), My.ReactionTime) < 1 + (My.Speed/Universe.Scaling) then
 			My.X = My.X - 1
 			My.LaneChangeCount = My.LaneChangeCount + 1
 			My.patience = Universe.StartingPatience
-			driveforward(My.PrevFrontDists(0))
+			driveforward(GetHistory(My.FrontDists(0), My.ReactionTime))
 
     //if social with no space behind
 	  else
-    	driveforward(My.PrevFrontDists(1))
+    	driveforward(GetHistory(My.FrontDists(1), My.ReactionTime))
 		end if
 
   //therefore right is most open
@@ -396,33 +395,23 @@ if My.Patience <= 0 and  GetHistory(My.Speed, 1) <> 0 then //if out of patience 
 			My.X = My.X + 1
 			My.LaneChangeCount = My.LaneChangeCount + 1
 			My.patience = Universe.StartingPatience
-			driveforward(My.PrevFrontDists(2))
+			driveforward(GetHistory(My.FrontDists(2), My.ReactionTime))
 
     //if social with space behind
-		elseif My.PrevBackDists(1) < 1 + (My.Speed/Universe.Scaling) then
+		elseif GetHistory(My.BackDists(1), My.ReactionTime) < 1 + (My.Speed/Universe.Scaling) then
 			My.X = My.X + 1
 			My.LaneChangeCount = My.LaneChangeCount + 1
 			My.patience = Universe.StartingPatience
-			driveforward(My.PrevFrontDists(2))
+			driveforward(GetHistory(My.FrontDists(2), My.ReactionTime))
 
 		//if social with no space behind, go forward
 		else
-			driveforward(My.PrevFrontDists(1))
+			driveforward(GetHistory(My.FrontDists(1), My.ReactionTime))
 		end if
 	end if
 else//if still patient
-	driveforward(My.PrevFrontDists(1))
+	driveforward(GetHistory(My.FrontDists(1), My.ReactionTime))
 end if
-
-dim i as integer
-
-for i = 0 to 2
-	My.PrevFrontDists(i) = My.FrontDists(i)
-Next i
-
-for i = 0 to 1
-	My.PrevBackDists(i) = My.BackDists(i)
-Next i
 }
 
 
@@ -517,6 +506,9 @@ My.Startstep = GetCountStep()
 My.LaneChangeCount = 0
 My.Patience = Universe.StartingPatience
 
+//currently hardcoded reaction time
+My.ReactionTime = 1
+
 
 //Speeds are all expressed in km/hr. Universe.Scaling converts speeds to spaces/tick (1 space = 5 m, 1 tick = 0.5 second)
 if Universe.RandomSpeeds then
@@ -560,16 +552,6 @@ else
 end if
 
 lookaround()
-
-dim i as integer
-
-for i = 0 to 2
-	My.PrevFrontDists(i) = My.FrontDists(i)
-Next i
-
-for i = 0 to 1
-	My.PrevBackDists(i) = My.BackDists(i)
-Next i
 }
 
 
@@ -1288,7 +1270,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 216, 202, 334, 463;
+    Display_Area = 0, 920, 1940, 113;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -1609,7 +1591,7 @@ Network_Info {
 // Window Location Definition Division
 //-------------------------------------------------------
 Window_Rectangle {
-    Window_Name = Main_Window, -8, -8, 1552, 848;
+    Window_Name = Main_Window, -8, -8, 1936, 1056;
     Window_Name = Output_Setting_Window, 551, 249, 480, 350;
     Window_Name = Artisoc_Help_Window, 10, 10, 400, 300;
 }
