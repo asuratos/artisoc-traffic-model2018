@@ -87,24 +87,24 @@ UNIVERSE {
 // Agent Variable Initial Data
 //-------------------------------------------------------
 Initial_Value {
-    UNIVERSE.STARTINGCARS = 1(220);
+    UNIVERSE.STARTINGCARS = 1(300);
     UNIVERSE.SCALING = 1(36.0);
     UNIVERSE.TARGETS = 1(0);
-    UNIVERSE.ASOCIALRATE = 1(0.0);
+    UNIVERSE.ASOCIALRATE = 1(0.5);
     UNIVERSE.SLOWDOWN = 1(0.0);
     UNIVERSE.NEWSTART = 1(0);
     UNIVERSE.DATAPOINTS = 1(10000);
     UNIVERSE.ASOCIALCOUNTOVERRIDE = 1(0);
     UNIVERSE.STOPSGAP = 1(30);
     UNIVERSE.LIGHTPERIOD = 1(100.0);
-    UNIVERSE.RANDOMSPEEDS = 1(1);
+    UNIVERSE.RANDOMSPEEDS = 1(0);
     UNIVERSE.IDEALSPEED = 1(60.0);
     UNIVERSE.NUMWAVES = 1(1);
     UNIVERSE.LIGHTACTIVETIME = 1(1.0);
     UNIVERSE.STARTINGPATIENCE = 1(10);
     UNIVERSE.RECORDDATA = 1(0);
     UNIVERSE.MAXCARS = 1(300);
-    UNIVERSE.DUMPSPEEDS = 1(0);
+    UNIVERSE.DUMPSPEEDS = 1(1);
     UNIVERSE.SPEEDPOINTS = 1(100);
 }
 
@@ -162,6 +162,7 @@ if (stepnumber mod sampleperiod == 0) and Universe.DumpSpeeds and (stepnumber < 
 		for each aCar in allCars
 			WriteFileCSV(1, aCar.Speed, False)
 			WriteFileCSV(1, stepnumber, False)
+			WriteFileCSV(1, aCar.ReactionTime/Universe.TimeScaling, False)
 			WriteFileCSV(1, aCar.Speed != aCar.MaxSpeed, True)
 		next aCar
 		CloseFileCSV(1)
@@ -272,6 +273,7 @@ if Universe.RecordData then
 
 	WriteFileCSV(1, "Travel Time", False)
 	WriteFileCSV(1, "Max Speed", False)
+	WriteFileCSV(1, "Reaction TIme", False
 	WriteFileCSV(1, "Lane Changes", False)
 	WriteFileCSV(1, "ASocial", False)
 	WriteFileCSV(1, "Number of Waves", False)
@@ -289,6 +291,7 @@ if Universe.DumpSpeeds then
 
 	WriteFileCSV(1, "Speed", False)
 	WriteFileCSV(1, "Time Step", False)
+	WriteFileCSV(1, "Reaction", False)
 	WriteFileCSV(1, "Slowed", True)
 	
 	CloseFileCSV(1)
@@ -335,7 +338,7 @@ end if
 lookaround()
 
 //----------- LANE CHANGING BLOCK ----------------
-if My.Patience <= 0 and  GetHistory(My.Speed, 1) <> 0 then //if out of patience and in motion
+if My.Patience <= 0 then //and  GetHistory(My.Speed, 1) <> 0 then //if out of patience and in motion
 
 	//if front is more open than left
 	if GetHistory(My.FrontDists(1), My.ReactionTime) >= GetHistory(My.FrontDists(0), My.ReactionTime) then
@@ -479,6 +482,7 @@ sub report(){
 
 			WriteFileCSV(1, My.TravelTime, False)
 			WriteFileCSV(1, My.MaxSpeed, False)
+			WriteFileCSV(1, My.ReactionTime/Universe.TimeScaling, False)
 			WriteFileCSV(1, My.LaneChangeCount, False)
 			WriteFileCSV(1, My.ASocial, False)
 			WriteFileCSV(1, Universe.NumWaves, False)
@@ -523,9 +527,9 @@ My.Accel = My.BaseAccel
 
 // Recovery time is the number of seconds a car will have a reduced acceleration value.
 if Universe.RandomRecoveryTime then
-	My.RecoveryTime = int(Rnd() * 10)
+	My.RecoveryTime = int(Rnd() * 10) * Universe.TimeScaling
 else
-	My.RecoveryTime = 5
+	My.RecoveryTime = 5 * Universe.TimeScaling
 end if
 
 //A car is in the "recovering" state when my.recovering != my.RecoveryTime
@@ -570,7 +574,7 @@ nextred = Universe.StopsGap - (My.Y mod Universe.StopsGap)
 
 MakeOneAgtSetAroundPositionCell(Lights, Universe.Road, 1, My.Y + nextred, 0, 2, Universe.Road.Stoplight)
 Light = GetAgt(Lights, 0)
-if Light.Color == Color_Green then
+if Light.Color != Color_red then
 	nextred = 100
 end if
 
@@ -665,7 +669,7 @@ Agt_Step{
 My.State = My.State - (1 / Universe.LightPeriod)
 
 if Universe.LightActiveTime == 1 then
-	My.Color = COLOR_GREEN
+	My.Color = Color_White
 elseif My.State <=  0 then
 	My.Color = COLOR_Red
 	My.State = 1
@@ -719,10 +723,10 @@ Map_Output {
     Title = "Road 1";
     Disable = No;
     Background_Color = 255, 255, 255;
-    Position_x = 774;
-    Position_y = 4;
+    Position_x = 756;
+    Position_y = 6;
     Size_x = 129;
-    Size_y = 721;
+    Size_y = 827;
     Map_Cell_Size = 2;
     Remarks = No;
     Legend_Pos = Top;
@@ -1055,10 +1059,10 @@ Map_Output {
     Title = "Road 2";
     Disable = No;
     Background_Color = 255, 255, 255;
-    Position_x = 879;
-    Position_y = 3;
+    Position_x = 887;
+    Position_y = 7;
     Size_x = 129;
-    Size_y = 724;
+    Size_y = 830;
     Map_Cell_Size = 2;
     Remarks = No;
     Legend_Pos = Top;
@@ -1165,10 +1169,10 @@ Map_Output {
     Title = "Road 3";
     Disable = No;
     Background_Color = 255, 255, 255;
-    Position_x = 1004;
-    Position_y = 4;
+    Position_x = 1018;
+    Position_y = 8;
     Size_x = 129;
-    Size_y = 724;
+    Size_y = 828;
     Map_Cell_Size = 2;
     Remarks = No;
     Legend_Pos = Top;
@@ -1286,7 +1290,7 @@ Control_Panel {
         Slider_Range_Max = 29;
         Slider_Value_Min = 10.0;
         Slider_Value_Step = 10.0;
-        Slider_Value = "21";
+        Slider_Value = "29";
     }
     Panel_Item {
         Item_Type = Slider;
@@ -1385,7 +1389,7 @@ Control_Panel {
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
-        Slider_Value = "0";
+        Slider_Value = "5";
     }
     Panel_Item {
         Item_Type = Toggle;
@@ -1408,11 +1412,11 @@ Control_Panel {
         Control_Off_Long = 0;
         Control_Off_Double = 0.0;
         Control_Off_String = "";
-        Toggle_Button_On = Yes;
+        Toggle_Button_On = No;
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
-        Slider_Value = "0";
+        Slider_Value = "5";
         Shortcut_Key = "";
     }
     Panel_Item {
@@ -1496,7 +1500,7 @@ Control_Panel {
         Control_Off_Long = 0;
         Control_Off_Double = 0.0;
         Control_Off_String = "";
-        Toggle_Button_On = No;
+        Toggle_Button_On = Yes;
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
