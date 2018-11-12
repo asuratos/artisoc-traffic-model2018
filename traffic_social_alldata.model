@@ -4,7 +4,7 @@
 //                                                                    /
 //====================================================================/
 
-Version = 4.0;
+Version = 4.2;
 
 
 
@@ -36,7 +36,7 @@ UNIVERSE {
             Dim BaseAccel(0, 0) As Integer = (0);
             Dim FrontDists(0, 0) <3> [3] As Integer = (3*0);
             Dim BackDists(0, 0) <3> [2] As Integer = (2*0);
-            Dim ReactionTime(0, 0) As Integer = ();
+            Dim ReactionTime(0, 0) As Integer = (0);
         }
         AgtType Stoplight(0, 0)[0] {
             Dim ID(0, 0) As Integer = (0);
@@ -157,15 +157,15 @@ if (stepnumber mod sampleperiod == 0) and Universe.DumpSpeeds and (stepnumber < 
 
 	makeAgtSet(allcars, Universe.Road.Car)
 	if CountAgtSet (allcars) <> 0 then
-		OpenFileCSV("data\\speeds_" & universe.StartingCars & "cars_" & Universe.ASocialrate & "_" & Universe.SpeedPoints & "points.csv", 1, 3)
+		OpenFileCSV("data\\speeds_" & universe.StartingCars & "cars_" & Universe.ASocialrate & "_" & Universe.SpeedPoints & "points.csv", 2, 3)
 
 		for each aCar in allCars
-			WriteFileCSV(1, aCar.Speed, False)
-			WriteFileCSV(1, stepnumber, False)
-			WriteFileCSV(1, aCar.ReactionTime/Universe.TimeScaling, False)
-			WriteFileCSV(1, aCar.Speed != aCar.MaxSpeed, True)
+			WriteFileCSV(2, aCar.Speed, False)
+			WriteFileCSV(2, stepnumber, False)
+			WriteFileCSV(2, aCar.ReactionTime/Universe.TimeScaling, False)
+			WriteFileCSV(2, aCar.Speed != aCar.MaxSpeed, True)
 		next aCar
-		CloseFileCSV(1)
+		CloseFileCSV(2)
 	end if
 elseif Universe.DumpSpeeds and (stepnumber > (samples * sampleperiod + 1)) then
 	
@@ -174,7 +174,11 @@ end if
 
 
 //----------------------UNIVERSE TERMINATION BLOCK--------------------------------------
-if Universe.RecordData then
+if Universe.DumpSpeeds and Universe.RecordData then
+	if Universe.FinishedCars > Universe.Datapoints and stepnumber > (samples * sampleperiod + 1) then
+		nextsim()
+	end if
+elseif Universe.RecordData then
 	if Universe.FinishedCars > Universe.Datapoints then
 		nextsim()
 	end if
@@ -287,14 +291,14 @@ if Universe.RecordData then
 end if
 
 if Universe.DumpSpeeds then
-	OpenFileCSV("data\\speeds_" & universe.StartingCars & "cars_" & Universe.ASocialrate & "_" & Universe.SpeedPoints & "points.csv", 1, 2)
+	OpenFileCSV("data\\speeds_" & universe.StartingCars & "cars_" & Universe.ASocialrate & "_" & Universe.SpeedPoints & "points.csv", 2, 2)
 
-	WriteFileCSV(1, "Speed", False)
-	WriteFileCSV(1, "Time Step", False)
-	WriteFileCSV(1, "Reaction", False)
-	WriteFileCSV(1, "Slowed", True)
+	WriteFileCSV(2, "Speed", False)
+	WriteFileCSV(2, "Time Step", False)
+	WriteFileCSV(2, "Reaction", False)
+	WriteFileCSV(2, "Slowed", True)
 	
-	CloseFileCSV(1)
+	CloseFileCSV(2)
 end if
 
 Universe.Newstart = GetCountStep()
@@ -466,7 +470,7 @@ sub report(){
 	My.traveltime = GetCountStep() - My.Startstep
 
 	if My.Traveltime >=  (Universe.LightPeriod * Universe.NumWaves) * 0.7 then
-		if GetCountStep() - Universe.Newstart >= 500 then
+		if GetCountStep() - Universe.Newstart >= 500 and Universe.FinishedCars < Universe.Datapoints then
 			Universe.AvgTraveltime = ((Universe.AvgTraveltime * Universe.FinishedCars) + My.TravelTime)/(Universe.FinishedCars + 1)
 			Universe.LatestTravelTime = My.TravelTime
 
@@ -1274,7 +1278,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 0, 920, 1940, 113;
+    Display_Area = 1542, 158, 340, 805;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -1605,4 +1609,47 @@ Window_Rectangle {
 // Help Favorite Division
 //-------------------------------------------------------
 Help_Favorite {
+}
+
+
+//-------------------------------------------------------
+// Model Description Division
+//-------------------------------------------------------
+Model_Description {
+    Universe {
+        Function Univ_Init {
+        }
+        Function Univ_Step_Begin {
+        }
+        Function Univ_Step_End {
+        }
+        Function Univ_Finish {
+        }
+        Function nextsim {
+        }
+        Function initialize {
+        }
+    }
+    Space Universe.Road {
+    }
+    Agent Universe.Road.Car {
+        Function Agt_Init {
+        }
+        Function Agt_Step {
+        }
+        Function driveforward {
+        }
+        Function report {
+        }
+        Function reinitialize {
+        }
+        Function lookaround {
+        }
+    }
+    Agent Universe.Road.Stoplight {
+        Function Agt_Init {
+        }
+        Function Agt_Step {
+        }
+    }
 }
