@@ -93,7 +93,7 @@ Initial_Value {
     UNIVERSE.ASOCIALRATE = 1(0.5);
     UNIVERSE.SLOWDOWN = 1(0.0);
     UNIVERSE.NEWSTART = 1(0);
-    UNIVERSE.DATAPOINTS = 1(10000);
+    UNIVERSE.DATAPOINTS = 1(100);
     UNIVERSE.ASOCIALCOUNTOVERRIDE = 1(0);
     UNIVERSE.STOPSGAP = 1(30);
     UNIVERSE.LIGHTPERIOD = 1(100.0);
@@ -102,7 +102,7 @@ Initial_Value {
     UNIVERSE.NUMWAVES = 1(1);
     UNIVERSE.LIGHTACTIVETIME = 1(1.0);
     UNIVERSE.STARTINGPATIENCE = 1(10);
-    UNIVERSE.RECORDDATA = 1(0);
+    UNIVERSE.RECORDDATA = 1(1);
     UNIVERSE.MAXCARS = 1(300);
     UNIVERSE.DUMPSPEEDS = 1(1);
     UNIVERSE.SPEEDPOINTS = 1(100);
@@ -175,7 +175,7 @@ end if
 
 //----------------------UNIVERSE TERMINATION BLOCK--------------------------------------
 if Universe.DumpSpeeds and Universe.RecordData then
-	if Universe.FinishedCars > Universe.Datapoints and stepnumber > (samples * sampleperiod + 1) then
+	if (Universe.FinishedCars >= Universe.Datapoints) and (stepnumber > (samples * sampleperiod + 1)) then
 		nextsim()
 	end if
 elseif Universe.RecordData then
@@ -277,7 +277,7 @@ if Universe.RecordData then
 
 	WriteFileCSV(1, "Travel Time", False)
 	WriteFileCSV(1, "Max Speed", False)
-	WriteFileCSV(1, "Reaction TIme", False
+	WriteFileCSV(1, "Reaction TIme", False)
 	WriteFileCSV(1, "Lane Changes", False)
 	WriteFileCSV(1, "ASocial", False)
 	WriteFileCSV(1, "Number of Waves", False)
@@ -1351,7 +1351,7 @@ Control_Panel {
         Font_Color = 0, 0, 0;
         Font_Background_Color = 0, 0, 0;
         Var_Name = "Universe.Datapoints";
-        Text_Data = "10000";
+        Text_Data = "100";
     }
     Panel_Item {
         Item_Type = Edit_Box;
@@ -1476,7 +1476,7 @@ Control_Panel {
         Control_Off_Long = 0;
         Control_Off_Double = 0.0;
         Control_Off_String = "";
-        Toggle_Button_On = No;
+        Toggle_Button_On = Yes;
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
