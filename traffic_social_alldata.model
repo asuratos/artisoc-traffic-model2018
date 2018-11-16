@@ -80,7 +80,7 @@ UNIVERSE {
     Dim SpeedPoints(0, 0) As Integer = (0);
     Dim SpaceScaling(0, 0) As Double = (0.0);
     Dim TimeScaling(0, 0) As Double = (0.0);
-    Dim BaseReactionTime(0, 0) As Integer = ();
+    Dim BaseReactionTime(0, 0) As Integer = (0);
 }
 
 
@@ -94,7 +94,7 @@ Initial_Value {
     UNIVERSE.ASOCIALRATE = 1(0.5);
     UNIVERSE.SLOWDOWN = 1(0.0);
     UNIVERSE.NEWSTART = 1(0);
-    UNIVERSE.DATAPOINTS = 1(1000);
+    UNIVERSE.DATAPOINTS = 1(100);
     UNIVERSE.ASOCIALCOUNTOVERRIDE = 1(0);
     UNIVERSE.STOPSGAP = 1(30);
     UNIVERSE.LIGHTPERIOD = 1(100.0);
@@ -106,7 +106,7 @@ Initial_Value {
     UNIVERSE.RECORDDATA = 1(1);
     UNIVERSE.MAXCARS = 1(300);
     UNIVERSE.DUMPSPEEDS = 1(1);
-    UNIVERSE.SPEEDPOINTS = 1(1000);
+    UNIVERSE.SPEEDPOINTS = 1(100);
 }
 
 
@@ -162,9 +162,15 @@ if (stepnumber mod sampleperiod == 0) and Universe.DumpSpeeds and (stepnumber < 
 
 		for each aCar in allCars
 			WriteFileCSV(2, aCar.Speed, False)
+			WriteFileCSV(2, aCar.MaxSpeed, False)
 			WriteFileCSV(2, stepnumber, False)
 			WriteFileCSV(2, aCar.ReactionTime/Universe.TimeScaling, False)
-			WriteFileCSV(2, aCar.Speed != aCar.MaxSpeed, True)
+			WriteFileCSV(2, aCar.Speed != aCar.MaxSpeed, False)
+			WriteFileCSV(2, Universe.StartingCars, False)
+			WriteFileCSV(2, aCar.ASocial, False)
+	
+			WriteFileCSV(2, Universe.ASocialrate, True)
+			
 		next aCar
 		CloseFileCSV(2)
 	end if
@@ -278,7 +284,7 @@ if Universe.RecordData then
 
 	WriteFileCSV(1, "Travel Time", False)
 	WriteFileCSV(1, "Max Speed", False)
-	WriteFileCSV(1, "Reaction TIme", False)
+	WriteFileCSV(1, "Reaction Time", False)
 	WriteFileCSV(1, "Lane Changes", False)
 	WriteFileCSV(1, "ASocial", False)
 	WriteFileCSV(1, "Number of Waves", False)
@@ -295,9 +301,13 @@ if Universe.DumpSpeeds then
 	OpenFileCSV("data\\speeds_" & universe.StartingCars & "cars_" & Universe.ASocialrate & "_" & "rt" & Universe.BaseReactionTime & "_ "& Universe.SpeedPoints & "points.csv", 2, 2)
 
 	WriteFileCSV(2, "Speed", False)
+	WriteFileCSV(2, "Max Speed", False)
 	WriteFileCSV(2, "Time Step", False)
-	WriteFileCSV(2, "Reaction", False)
-	WriteFileCSV(2, "Slowed", True)
+	WriteFileCSV(2, "Reaction Time", False)
+	WriteFileCSV(2, "Slowed", False)
+	WriteFileCSV(2, "Total Cars", False)
+	WriteFileCSV(2, "ASocial", False)
+	WriteFileCSV(2, "ASocial Rate", True)
 	
 	CloseFileCSV(2)
 end if
@@ -1278,7 +1288,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 1542, 158, 340, 805;
+    Display_Area = 1384, 344, 382, 497;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -1351,7 +1361,7 @@ Control_Panel {
         Font_Color = 0, 0, 0;
         Font_Background_Color = 0, 0, 0;
         Var_Name = "Universe.Datapoints";
-        Text_Data = "1000";
+        Text_Data = "100";
     }
     Panel_Item {
         Item_Type = Edit_Box;
@@ -1364,7 +1374,7 @@ Control_Panel {
         Font_Color = 0, 0, 0;
         Font_Background_Color = 0, 0, 0;
         Var_Name = "Universe.SpeedPoints";
-        Text_Data = "1000";
+        Text_Data = "100";
     }
     Panel_Item {
         Item_Type = Drop_Down_List;
