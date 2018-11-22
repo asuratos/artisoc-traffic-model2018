@@ -20,7 +20,7 @@ UNIVERSE {
             Dim Layer(0, 0) As Integer = (0);
             Dim Direction(0, 0) As Double = (0.0);
             Dim MaxSpeed(0, 0) As Double = (0.0);
-            Dim Speed(0, 0) <1>  As Double = (0.0);
+            Dim Speed(0, 0) <1>  As Double = ();
             Dim Target(0, 0) As Double = (0.0);
             Dim ASocial(0, 0) As Boolean = (0);
             Dim Accel(0, 0) As Double = (0.0);
@@ -81,6 +81,9 @@ UNIVERSE {
     Dim SpaceScaling(0, 0) As Double = (0.0);
     Dim TimeScaling(0, 0) As Double = (0.0);
     Dim BaseReactionTime(0, 0) As Integer = (0);
+    Dim RecordedSpeedPoints(0, 0) As Integer = ();
+    Dim DumpJams(0, 0) As Boolean = ();
+    Dim WatchTime(0, 0) As Integer = ();
 }
 
 
@@ -88,13 +91,13 @@ UNIVERSE {
 // Agent Variable Initial Data
 //-------------------------------------------------------
 Initial_Value {
-    UNIVERSE.STARTINGCARS = 1(300);
+    UNIVERSE.STARTINGCARS = 1(10);
     UNIVERSE.SCALING = 1(36.0);
     UNIVERSE.TARGETS = 1(0);
     UNIVERSE.ASOCIALRATE = 1(0.5);
     UNIVERSE.SLOWDOWN = 1(0.0);
     UNIVERSE.NEWSTART = 1(0);
-    UNIVERSE.DATAPOINTS = 1(1000);
+    UNIVERSE.DATAPOINTS = 1(10);
     UNIVERSE.ASOCIALCOUNTOVERRIDE = 1(0);
     UNIVERSE.STOPSGAP = 1(30);
     UNIVERSE.LIGHTPERIOD = 1(100.0);
@@ -103,10 +106,12 @@ Initial_Value {
     UNIVERSE.NUMWAVES = 1(1);
     UNIVERSE.LIGHTACTIVETIME = 1(1.0);
     UNIVERSE.STARTINGPATIENCE = 1(10);
-    UNIVERSE.RECORDDATA = 1(0);
+    UNIVERSE.RECORDDATA = 1(1);
     UNIVERSE.MAXCARS = 1(300);
     UNIVERSE.DUMPSPEEDS = 1(1);
-    UNIVERSE.SPEEDPOINTS = 1(100);
+    UNIVERSE.SPEEDPOINTS = 1(10);
+    UNIVERSE.RECORDEDSPEEDPOINTS = 1(0);
+    UNIVERSE.DUMPJAMS = 1(1);
 }
 
 
@@ -115,8 +120,59 @@ Initial_Value {
 //-------------------------------------------------------
 #begin_rule UNIVERSE
 Univ_Init{
-if Universe.RecordData or Universe.DumpSpeeds then
-	initialize(10, 0.0, 0)
+
+if Universe.RecordData then
+	OpenFileCSV("data\\output.csv", 1, 2)
+
+	WriteFileCSV(1, "Travel Time", False)
+	WriteFileCSV(1, "Max Speed", False)
+	WriteFileCSV(1, "Reaction Time", False)
+	WriteFileCSV(1, "Lane Changes", False)
+	WriteFileCSV(1, "ASocial", False)
+	WriteFileCSV(1, "Number of Waves", False)
+	WriteFileCSV(1, "Spacing Between Lights", False)
+	WriteFileCSV(1, "Stoplight Active Time", False)
+
+	WriteFileCSV(1, "Total Cars", False)
+	WriteFileCSV(1, "ASocial Rate", True)
+
+	CloseFileCSV(1)
+end if
+
+if Universe.DumpSpeeds then
+	OpenFileCSV("data\\speeds.csv", 2, 2)
+
+	WriteFileCSV(2, "Speed", False)
+	WriteFileCSV(2, "Max Speed", False)
+	WriteFileCSV(2, "Time Step", False)
+	WriteFileCSV(2, "Reaction Time", False)
+	WriteFileCSV(2, "Slowed", False)
+	WriteFileCSV(2, "Total Cars", False)
+	WriteFileCSV(2, "ASocial", False)
+	WriteFileCSV(2, "ASocial Rate", False)
+	WriteFileCSV(2, "Spacing Between Lights", False)
+	WriteFileCSV(2, "Stoplight Active Time", True)
+	
+	CloseFileCSV(2)
+end if
+
+if Universe.DumpJams then
+	OpenFileCSV("data\\Jams.csv", 3, 2)
+
+	WriteFileCSV(3, "ASocial Rate", False)
+	WriteFileCSV(3, "Total Cars", False)
+	
+	WriteFileCSV(3, "ASocial", False)
+	WriteFileCSV(3, "Reaction", False)
+	WriteFileCSV(3, "Time", False)
+	WriteFileCSV(3, "X", False)
+	WriteFileCSV(3, "Y", True)
+
+	CloseFileCSV(3)
+end if
+
+if Universe.RecordData or Universe.DumpSpeeds or Universe.DumpJams then
+	initialize(10, 0.0, 2)
 else
 	initialize(Universe.StartingCars, Universe.ASocialrate, Universe.BaseReactionTime)
 end if
@@ -137,6 +193,11 @@ dim sampleperiod as integer
 dim samples as double
 dim stepnumber as integer
 
+dim dataNotDone as boolean
+dim speedsNotDone as boolean
+dim jamsNotDone as boolean
+
+
 //----------------------------------CAR REGENERATION BLOCK-----------------------------
 if CountAgt(Universe.Road.Car) < Universe.StartingCars then
 	i = Int(Rnd() * 3)
@@ -150,15 +211,13 @@ end if
 
 //---------------------------------SPEED DUMP BLOCK-------------------------
 sampleperiod = 100
-samples = Universe.SpeedPoints / Universe.StartingCars
 
 stepnumber = GetCountStep() - Universe.Newstart
 
-if (stepnumber mod sampleperiod == 0) and Universe.DumpSpeeds and (stepnumber < (samples * sampleperiod + 1)) then
-
+if (stepnumber mod sampleperiod == 0) and Universe.DumpSpeeds and Universe.RecordedSpeedPoints < Universe.SpeedPoints then
 	makeAgtSet(allcars, Universe.Road.Car)
 	if CountAgtSet (allcars) <> 0 then
-		OpenFileCSV("data\\speeds_" & universe.StartingCars & "cars_" & Universe.ASocialrate & "_" & "rt" & Universe.BaseReactionTime & "_"& Universe.SpeedPoints & "points.csv", 2, 3)
+		OpenFileCSV("data\\speeds.csv", 2, 3)
 
 		for each aCar in allCars
 			WriteFileCSV(2, aCar.Speed, False)
@@ -169,30 +228,30 @@ if (stepnumber mod sampleperiod == 0) and Universe.DumpSpeeds and (stepnumber < 
 			WriteFileCSV(2, Universe.StartingCars, False)
 			WriteFileCSV(2, aCar.ASocial, False)
 	
-			WriteFileCSV(2, Universe.ASocialrate, True)
+			WriteFileCSV(2, Universe.ASocialrate, False)
+			WriteFileCSV(2, Universe.StopsGap, False)
+			WriteFileCSV(2, Universe.LightActiveTime, True)
+
+			Universe.RecordedSpeedPoints = Universe.RecordedSpeedPoints + 1
 			
 		next aCar
 		CloseFileCSV(2)
 	end if
-elseif Universe.DumpSpeeds and (stepnumber > (samples * sampleperiod + 1)) then
-	
 end if
 
 
 
 //----------------------UNIVERSE TERMINATION BLOCK--------------------------------------
-if Universe.DumpSpeeds and Universe.RecordData then
-	if (Universe.FinishedCars >= Universe.Datapoints) and (stepnumber > (samples * sampleperiod + 1)) then
-		nextsim()
-	end if
-elseif Universe.RecordData then
-	if Universe.FinishedCars > Universe.Datapoints then
-		nextsim()
-	end if
-elseif Universe.DumpSpeeds then
-	if stepnumber > (samples * sampleperiod + 1) then
-		nextsim()
-	end if
+//check what's done
+dataNotDone = not (Universe.FinishedCars >= Universe.Datapoints)
+speedsNotDone = not (Universe.RecordedSpeedPoints >= Universe.SpeedPoints)
+jamsNotDone = not (stepnumber > 500 + (Universe.WatchTime * Universe.TimeScaling))
+
+//if something isn't done, keeo going
+if (Universe.RecordData and dataNotDone) or (Universe.DumpSpeeds and speedsNotDone) or (Universe.DumpJams and jamsNotDone) then
+	//keep going
+else
+	nextsim()
 end if
 }
 
@@ -250,10 +309,11 @@ Dim stop as agt
 Universe.StartingCars = startingcars
 Universe.ASocialrate = ASocialrate
 Universe.BaseReactionTime = basereactiontime
+Universe.RecordedSpeedPoints = 0
 
 Universe.ASocialcars = 0
 
-Universe.TimeScaling = 10 //seconds per tick
+Universe.TimeScaling = 2 //ticks per second
 Universe.SpaceScaling = 5 //meters per unit space on the simulation
 Universe.Scaling = 3.6 * Universe.TimeScaling * Universe.SpaceScaling  //Scaling converts from km/hr to units per tick
 
@@ -279,38 +339,9 @@ RandomPutAgtSetCell(cars, False)
 
 Universe.FinishedCars = 0
 
-if Universe.RecordData then
-	OpenFileCSV("data\\output_" & Universe.StartingCars & "as" & Universe.ASocialrate & "rt" & Universe.BaseReactionTime & "," & Universe.Datapoints&"points.csv", 1, 2)
 
-	WriteFileCSV(1, "Travel Time", False)
-	WriteFileCSV(1, "Max Speed", False)
-	WriteFileCSV(1, "Reaction Time", False)
-	WriteFileCSV(1, "Lane Changes", False)
-	WriteFileCSV(1, "ASocial", False)
-	WriteFileCSV(1, "Number of Waves", False)
-	WriteFileCSV(1, "Spacing Between Lights", False)
-	WriteFileCSV(1, "Stoplight Active Time", False)
-
-	WriteFileCSV(1, "Total Cars", False)
-	WriteFileCSV(1, "ASocial Rate", True)
-
-	CloseFileCSV(1)
-end if
-
-if Universe.DumpSpeeds then
-	OpenFileCSV("data\\speeds_" & universe.StartingCars & "cars_" & Universe.ASocialrate & "_" & "rt" & Universe.BaseReactionTime & "_"& Universe.SpeedPoints & "points.csv", 2, 2)
-
-	WriteFileCSV(2, "Speed", False)
-	WriteFileCSV(2, "Max Speed", False)
-	WriteFileCSV(2, "Time Step", False)
-	WriteFileCSV(2, "Reaction Time", False)
-	WriteFileCSV(2, "Slowed", False)
-	WriteFileCSV(2, "Total Cars", False)
-	WriteFileCSV(2, "ASocial", False)
-	WriteFileCSV(2, "ASocial Rate", True)
 	
-	CloseFileCSV(2)
-end if
+
 
 Universe.Newstart = GetCountStep()
 }
@@ -435,6 +466,7 @@ end if
 
 sub driveforward(headway as double) {
 dim overflow as double
+dim stepnumber as integer
 
 My.Allowance = 1 + (My.Speed/Universe.Scaling) * 1
 
@@ -453,8 +485,13 @@ else
 	end if
 end if
 
+stepnumber = GetCountStep() - Universe.Newstart
+
 if My.Speed < 0 then
 	My.Speed = 0
+	if (Universe.DumpJams and GetHistory(My.Speed, 1) != 0) and (stepnumber > 500 or stepnumber < 500 + (Universe.WatchTime * Universe.TimeScaling)) then
+		reportStop()
+	end if
 end if
 /*
 if My.patience > 0 then
@@ -493,7 +530,7 @@ sub report(){
 				Universe.LatestLaneChanges = My.LaneChangeCount
 			end if
  	//------------------------------------------------REPORT DATA------------------------------------
-			OpenFileCSV("data\\output_" & Universe.StartingCars & "as" & Universe.ASocialrate & "rt" & Universe.BaseReactionTime & "," & Universe.Datapoints&"points.csv", 1, 3)
+			OpenFileCSV("data\\output.csv", 1, 3)
 
 			WriteFileCSV(1, My.TravelTime, False)
 			WriteFileCSV(1, My.MaxSpeed, False)
@@ -517,6 +554,21 @@ sub report(){
 	end if
 }
 
+
+sub reportStop(){
+	OpenFileCSV("data\\Jams.csv", 3, 3)
+	
+	WriteFileCSV(3, Universe.ASocialrate, False)
+	WriteFileCSV(3, Universe.StartingCars, False)
+	
+	WriteFileCSV(3, My.ASocial, False)
+	WriteFileCSV(3, My.ReactionTime/Universe.TimeScaling, False)
+	WriteFileCSV(3, (GetCountStep() - Universe.Newstart)/Universe.TimeScaling, False)
+	WriteFileCSV(3, My.X, False)
+	WriteFileCSV(3, My.Y, True)
+
+	CloseFileCSV(3)
+}
 
 
 sub reinitialize(){
@@ -1073,7 +1125,7 @@ Map_Output {
     Title = "Road 2";
     Disable = No;
     Background_Color = 255, 255, 255;
-    Position_x = 887;
+    Position_x = 889;
     Position_y = 7;
     Size_x = 129;
     Size_y = 830;
@@ -1288,7 +1340,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 1444, 326, 382, 497;
+    Display_Area = 1452, 232, 438, 765;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -1304,7 +1356,7 @@ Control_Panel {
         Slider_Range_Max = 29;
         Slider_Value_Min = 10.0;
         Slider_Value_Step = 10.0;
-        Slider_Value = "29";
+        Slider_Value = "0";
     }
     Panel_Item {
         Item_Type = Slider;
@@ -1361,7 +1413,7 @@ Control_Panel {
         Font_Color = 0, 0, 0;
         Font_Background_Color = 0, 0, 0;
         Var_Name = "Universe.Datapoints";
-        Text_Data = "1000";
+        Text_Data = "10";
     }
     Panel_Item {
         Item_Type = Edit_Box;
@@ -1374,7 +1426,7 @@ Control_Panel {
         Font_Color = 0, 0, 0;
         Font_Background_Color = 0, 0, 0;
         Var_Name = "Universe.SpeedPoints";
-        Text_Data = "100";
+        Text_Data = "10";
     }
     Panel_Item {
         Item_Type = Drop_Down_List;
@@ -1486,7 +1538,7 @@ Control_Panel {
         Control_Off_Long = 0;
         Control_Off_Double = 0.0;
         Control_Off_String = "";
-        Toggle_Button_On = No;
+        Toggle_Button_On = Yes;
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
@@ -1552,6 +1604,47 @@ Control_Panel {
         Control_On_String = "";
         Shortcut_Key = "";
     }
+    Panel_Item {
+        Item_Type = Toggle;
+        Item_Name = "Find Jams?";
+        Display_Area = 0, 0, 0, 0;
+        Font_Name = "";
+        Font_Char_Set = 0;
+        Font_Size = 0.0;
+        Font_Style = 0;
+        Font_Color = 0, 0, 0;
+        Font_Background_Color = 0, 0, 0;
+        Var_Name = "Universe.DumpJams";
+        Control_On = Yes;
+        Control_On_Int = 0;
+        Control_On_Long = 0;
+        Control_On_Double = 0.0;
+        Control_On_String = "";
+        Control_Off = No;
+        Control_Off_Int = 0;
+        Control_Off_Long = 0;
+        Control_Off_Double = 0.0;
+        Control_Off_String = "";
+        Toggle_Button_On = Yes;
+        Slider_Range_Max = 10;
+        Slider_Value_Min = 0.0;
+        Slider_Value_Step = 0.1;
+        Slider_Value = "10";
+        Shortcut_Key = "";
+    }
+    Panel_Item {
+        Item_Type = Edit_Box;
+        Item_Name = "Watch time (seconds)";
+        Display_Area = 0, 0, 0, 0;
+        Font_Name = "";
+        Font_Char_Set = 0;
+        Font_Size = 0.0;
+        Font_Style = 0;
+        Font_Color = 0, 0, 0;
+        Font_Background_Color = 0, 0, 0;
+        Var_Name = "Universe.WatchTime";
+        Text_Data = "200";
+    }
 }
 
 
@@ -1574,8 +1667,8 @@ Others_Data {
     Debug_Position_y = 75;
     Debug_Size_x = 400;
     Debug_Size_y = 200;
-    Console_Position_x = 144;
-    Console_Position_y = 172;
+    Console_Position_x = 102;
+    Console_Position_y = 394;
     Console_Size_x = 600;
     Console_Size_y = 452;
     Componen_Tree_Position_x = 2;
@@ -1650,6 +1743,8 @@ Model_Description {
         Function driveforward {
         }
         Function report {
+        }
+        Function reportStop {
         }
         Function reinitialize {
         }
