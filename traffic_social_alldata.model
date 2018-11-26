@@ -37,6 +37,7 @@ UNIVERSE {
             Dim FrontDists(0, 0) <3> [3] As Integer = (3*0);
             Dim BackDists(0, 0) <3> [2] As Integer = (2*0);
             Dim ReactionTime(0, 0) As Integer = (0);
+            Dim Tracking(0, 0) As Boolean = ();
         }
         AgtType Stoplight(0, 0)[0] {
             Dim ID(0, 0) As Integer = (0);
@@ -84,6 +85,11 @@ UNIVERSE {
     Dim RecordedSpeedPoints(0, 0) As Integer = ();
     Dim DumpJams(0, 0) As Boolean = ();
     Dim WatchTime(0, 0) As Integer = ();
+    Dim TrackCar(0, 0) As Boolean = ();
+    Dim TrackingDoneSocial(0, 0) As Boolean = ();
+    Dim TrackingDoneAsocial(0, 0) As Boolean = ();
+    Dim currentlyTrackingSocial(0, 0) As Boolean = ();
+    Dim currentlyTrackingASocial(0, 0) As Boolean = ();
 }
 
 
@@ -106,12 +112,12 @@ Initial_Value {
     UNIVERSE.NUMWAVES = 1(1);
     UNIVERSE.LIGHTACTIVETIME = 1(1.0);
     UNIVERSE.STARTINGPATIENCE = 1(10);
-    UNIVERSE.RECORDDATA = 1(1);
+    UNIVERSE.RECORDDATA = 1(0);
     UNIVERSE.MAXCARS = 1(300);
-    UNIVERSE.DUMPSPEEDS = 1(1);
+    UNIVERSE.DUMPSPEEDS = 1(0);
     UNIVERSE.SPEEDPOINTS = 1(10);
     UNIVERSE.RECORDEDSPEEDPOINTS = 1(0);
-    UNIVERSE.DUMPJAMS = 1(1);
+    UNIVERSE.DUMPJAMS = 1(0);
 }
 
 
@@ -171,8 +177,25 @@ if Universe.DumpJams then
 	CloseFileCSV(3)
 end if
 
-if Universe.RecordData or Universe.DumpSpeeds or Universe.DumpJams then
-	initialize(10, 0.0, 2)
+if Universe.TrackCar then
+	OpenfileCSV("data\\singlecar.csv", 4, 2)
+
+	WriteFileCSV(4, "Lifetime", False)
+	WriteFileCSV(4, "X", False)
+	WriteFileCSV(4, "Y", False)
+	WriteFileCSV(4, "Speed", False)
+	WriteFileCSV(4, "MaxSpeed", False)
+	WriteFileCSV(4, "Reaction", False)
+
+	WriteFileCSV(4, "ASocial Rate", False)
+	WriteFileCSV(4, "ASocial", False)
+	WriteFileCSV(4, "TotalCars", True)
+
+	CloseFileCSV(4)
+end if
+
+if Universe.RecordData or Universe.DumpSpeeds or Universe.DumpJams or Universe.TrackCar then
+	initialize(10, 0.0, 0)
 else
 	initialize(Universe.StartingCars, Universe.ASocialrate, Universe.BaseReactionTime)
 end if
@@ -196,6 +219,7 @@ dim stepnumber as integer
 dim dataNotDone as boolean
 dim speedsNotDone as boolean
 dim jamsNotDone as boolean
+dim trackingNotDone as boolean
 
 
 //----------------------------------CAR REGENERATION BLOCK-----------------------------
@@ -246,9 +270,10 @@ end if
 dataNotDone = not (Universe.FinishedCars >= Universe.Datapoints)
 speedsNotDone = not (Universe.RecordedSpeedPoints >= Universe.SpeedPoints)
 jamsNotDone = not (stepnumber > 500 + (Universe.WatchTime * Universe.TimeScaling))
+trackingNotDone = not (Universe.TrackingDoneAsocial and Universe.TrackingDoneSocial)
 
-//if something isn't done, keeo going
-if (Universe.RecordData and dataNotDone) or (Universe.DumpSpeeds and speedsNotDone) or (Universe.DumpJams and jamsNotDone) then
+//if something isn't done, keep going
+if (Universe.RecordData and dataNotDone) or (Universe.DumpSpeeds and speedsNotDone) or (Universe.DumpJams and jamsNotDone) or (Universe.TrackCar and trackingNotDone) then
 	//keep going
 else
 	nextsim()
@@ -339,8 +364,17 @@ RandomPutAgtSetCell(cars, False)
 
 Universe.FinishedCars = 0
 
+Universe.TrackingDoneSocial = False
+Universe.TrackingDoneAsocial = False
 
-	
+Universe.currentlyTrackingSocial = False
+Universe.currentlyTrackingASocial = False
+
+if ASocialrate == 0 then
+	Universe.TrackingDoneAsocial = True
+elseif ASocialrate >= 0.99 then
+	Universe.TrackingDoneSocial = True
+end if
 
 
 Universe.Newstart = GetCountStep()
@@ -493,21 +527,42 @@ if My.Speed < 0 then
 		reportStop()
 	end if
 end if
-/*
-if My.patience > 0 then
-	My.patience = My.patience - 1
-end if
-*/
-
 Forward(My.Speed / Universe.Scaling)
+
+//if this is being tracked, report
+if My.Tracking then
+	OpenfileCSV("data\\singlecar.csv", 4, 3)
+
+	WriteFileCSV(4, GetCountStep() -My.Startstep, False)
+	WriteFileCSV(4, My.X, False)
+	WriteFileCSV(4, My.Y, False)
+	WriteFileCSV(4, My.Speed, False)
+	WriteFileCSV(4, My.MaxSpeed, False)
+	WriteFileCSV(4, My.ReactionTime/Universe.TimeScaling, False)
+
+	WriteFileCSV(4, Universe.ASocialrate, False)
+	WriteFileCSV(4, My.ASocial, False)
+	WriteFileCSV(4, Universe.StartingCars, True)
+	
+	CloseFileCSV(4)
+end if
 
 if My.Y < My.PrevY then
 	if Universe.RecordData then
 		report()
 	else
 		My.TravelTime = GetCountStep() -My.Startstep
-		My.Startstep = GetCountStep()
+		My.Startstep = GetCountStep()		
 	end if
+
+	if My.Tracking and My.ASocial then
+		Universe.TrackingDoneAsocial = True
+	elseif My.Tracking and (not My.ASocial)  then
+		Universe.TrackingDoneSocial = True
+	end if
+	
+	reinitialize()
+	
 end if
 
 My.PrevY = My.Y
@@ -620,6 +675,19 @@ else
 	My.ASocial = False
 	My.Status = Color_green
 end if
+
+//initialize tracking
+if Universe.TrackCar and (GetCountStep() - Universe.Newstart) > 100 then
+	if (not Universe.TrackingDoneSocial) and (not My.ASocial) and (not Universe.currentlyTrackingSocial) then
+		My.Tracking = True
+		Universe.currentlyTrackingSocial = True
+	elseif (not Universe.TrackingDoneAsocial) and My.ASocial  and (not Universe.currentlyTrackingASocial) then
+		My.Tracking = True
+		Universe.currentlyTrackingASocial = True
+	end if
+end if
+		
+
 
 lookaround()
 }
@@ -1340,7 +1408,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 1452, 232, 438, 765;
+    Display_Area = 1434, 100, 486, 893;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -1538,7 +1606,7 @@ Control_Panel {
         Control_Off_Long = 0;
         Control_Off_Double = 0.0;
         Control_Off_String = "";
-        Toggle_Button_On = Yes;
+        Toggle_Button_On = No;
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
@@ -1566,7 +1634,7 @@ Control_Panel {
         Control_Off_Long = 0;
         Control_Off_Double = 0.0;
         Control_Off_String = "";
-        Toggle_Button_On = Yes;
+        Toggle_Button_On = No;
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
@@ -1625,7 +1693,7 @@ Control_Panel {
         Control_Off_Long = 0;
         Control_Off_Double = 0.0;
         Control_Off_String = "";
-        Toggle_Button_On = Yes;
+        Toggle_Button_On = No;
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
@@ -1644,6 +1712,34 @@ Control_Panel {
         Font_Background_Color = 0, 0, 0;
         Var_Name = "Universe.WatchTime";
         Text_Data = "200";
+    }
+    Panel_Item {
+        Item_Type = Toggle;
+        Item_Name = "Track a Car?";
+        Display_Area = 0, 0, 0, 0;
+        Font_Name = "";
+        Font_Char_Set = 0;
+        Font_Size = 0.0;
+        Font_Style = 0;
+        Font_Color = 0, 0, 0;
+        Font_Background_Color = 0, 0, 0;
+        Var_Name = "Universe.TrackCar";
+        Control_On = Yes;
+        Control_On_Int = 0;
+        Control_On_Long = 0;
+        Control_On_Double = 0.0;
+        Control_On_String = "";
+        Control_Off = No;
+        Control_Off_Int = 0;
+        Control_Off_Long = 0;
+        Control_Off_Double = 0.0;
+        Control_Off_String = "";
+        Toggle_Button_On = Yes;
+        Slider_Range_Max = 10;
+        Slider_Value_Min = 0.0;
+        Slider_Value_Step = 0.1;
+        Slider_Value = "10";
+        Shortcut_Key = "";
     }
 }
 
