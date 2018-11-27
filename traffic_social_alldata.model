@@ -1408,7 +1408,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 1434, 100, 486, 893;
+    Display_Area = 1317, 0, 486, 827;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -1763,8 +1763,8 @@ Others_Data {
     Debug_Position_y = 75;
     Debug_Size_x = 400;
     Debug_Size_y = 200;
-    Console_Position_x = 102;
-    Console_Position_y = 394;
+    Console_Position_x = 219;
+    Console_Position_y = 211;
     Console_Size_x = 600;
     Console_Size_y = 452;
     Componen_Tree_Position_x = 2;
