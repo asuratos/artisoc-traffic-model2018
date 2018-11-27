@@ -100,10 +100,10 @@ Initial_Value {
     UNIVERSE.STARTINGCARS = 1(10);
     UNIVERSE.SCALING = 1(36.0);
     UNIVERSE.TARGETS = 1(0);
-    UNIVERSE.ASOCIALRATE = 1(0.5);
+    UNIVERSE.ASOCIALRATE = 1(0.0);
     UNIVERSE.SLOWDOWN = 1(0.0);
     UNIVERSE.NEWSTART = 1(0);
-    UNIVERSE.DATAPOINTS = 1(10);
+    UNIVERSE.DATAPOINTS = 1(1000);
     UNIVERSE.ASOCIALCOUNTOVERRIDE = 1(0);
     UNIVERSE.STOPSGAP = 1(30);
     UNIVERSE.LIGHTPERIOD = 1(100.0);
@@ -112,12 +112,14 @@ Initial_Value {
     UNIVERSE.NUMWAVES = 1(1);
     UNIVERSE.LIGHTACTIVETIME = 1(1.0);
     UNIVERSE.STARTINGPATIENCE = 1(10);
-    UNIVERSE.RECORDDATA = 1(0);
+    UNIVERSE.RECORDDATA = 1(1);
     UNIVERSE.MAXCARS = 1(300);
-    UNIVERSE.DUMPSPEEDS = 1(0);
-    UNIVERSE.SPEEDPOINTS = 1(10);
+    UNIVERSE.DUMPSPEEDS = 1(1);
+    UNIVERSE.SPEEDPOINTS = 1(100);
     UNIVERSE.RECORDEDSPEEDPOINTS = 1(0);
-    UNIVERSE.DUMPJAMS = 1(0);
+    UNIVERSE.DUMPJAMS = 1(1);
+    UNIVERSE.WATCHTIME = 1(120);
+    UNIVERSE.TRACKCAR = 1(1);
 }
 
 
@@ -267,9 +269,9 @@ end if
 
 //----------------------UNIVERSE TERMINATION BLOCK--------------------------------------
 //check what's done
-dataNotDone = not (Universe.FinishedCars >= Universe.Datapoints)
-speedsNotDone = not (Universe.RecordedSpeedPoints >= Universe.SpeedPoints)
-jamsNotDone = not (stepnumber > 500 + (Universe.WatchTime * Universe.TimeScaling))
+dataNotDone = Universe.FinishedCars < Universe.Datapoints
+speedsNotDone = Universe.RecordedSpeedPoints < Universe.SpeedPoints
+jamsNotDone = stepnumber < ( 500 + (Universe.WatchTime * Universe.TimeScaling))
 trackingNotDone = not (Universe.TrackingDoneAsocial and Universe.TrackingDoneSocial)
 
 //if something isn't done, keep going
@@ -296,7 +298,6 @@ dim allcars as agtset
 		next aCar
 	end if
 
-	Universe.FinishedCars = 0
 
 	//report that one run was just finished
 	println(Universe.StartingCars & " starting cars, " & Universe.ASocialrate & " ASocialness, "&Universe.BaseReactionTime/Universe.TimeScaling&" Reaction time Done")
@@ -304,7 +305,7 @@ dim allcars as agtset
 	
 	//determine parameters for next run
 	if Universe.BaseReactionTime == 2 then
-		if Universe.ASocialrate >= 0.999 then
+		if Universe.ASocialrate >= 0.99 then
 			if Universe.StartingCars == Universe.MaxCars then
 				//all three parameters are at max, therefore the simulations are complete
 				ExitSimulationMsgLn("ALL Completed")
@@ -336,6 +337,7 @@ Universe.ASocialrate = ASocialrate
 Universe.BaseReactionTime = basereactiontime
 Universe.RecordedSpeedPoints = 0
 
+Universe.Newstart = GetCountStep()
 Universe.ASocialcars = 0
 
 Universe.TimeScaling = 2 //ticks per second
@@ -376,8 +378,6 @@ elseif ASocialrate >= 0.99 then
 	Universe.TrackingDoneSocial = True
 end if
 
-
-Universe.Newstart = GetCountStep()
 }
 #end_rule UNIVERSE
 
@@ -523,14 +523,15 @@ stepnumber = GetCountStep() - Universe.Newstart
 
 if My.Speed < 0 then
 	My.Speed = 0
-	if (Universe.DumpJams and GetHistory(My.Speed, 1) != 0) and (stepnumber > 500 or stepnumber < 500 + (Universe.WatchTime * Universe.TimeScaling)) then
+	if (Universe.DumpJams and GetHistory(My.Speed, 1) != 0) and (stepnumber > 500 and stepnumber < 500 + (Universe.WatchTime * Universe.TimeScaling)) then
 		reportStop()
 	end if
 end if
+
 Forward(My.Speed / Universe.Scaling)
 
 //if this is being tracked, report
-if My.Tracking then
+if My.Tracking and My.PrevY < My.Y then
 	OpenfileCSV("data\\singlecar.csv", 4, 3)
 
 	WriteFileCSV(4, GetCountStep() -My.Startstep, False)
@@ -547,7 +548,19 @@ if My.Tracking then
 	CloseFileCSV(4)
 end if
 
+//at end of road
 if My.Y < My.PrevY then
+
+	if My.Tracking then
+		if My.ASocial then
+			Universe.TrackingDoneAsocial = True
+			My.Tracking = False
+		elseif not My.ASocial  then
+			Universe.TrackingDoneSocial = True
+			My.Tracking = False
+		end if
+	end if
+	
 	if Universe.RecordData then
 		report()
 	else
@@ -555,11 +568,6 @@ if My.Y < My.PrevY then
 		My.Startstep = GetCountStep()		
 	end if
 
-	if My.Tracking and My.ASocial then
-		Universe.TrackingDoneAsocial = True
-	elseif My.Tracking and (not My.ASocial)  then
-		Universe.TrackingDoneSocial = True
-	end if
 	
 	reinitialize()
 	
@@ -604,7 +612,7 @@ sub report(){
 		end if
 
 // -------------------REINITIALIZE VALUES-------------------
-		reinitialize()
+		//reinitialize()
 
 	end if
 }
@@ -632,6 +640,7 @@ My.Startstep = GetCountStep()
 My.LaneChangeCount = 0
 My.Patience = Universe.StartingPatience
 
+My.Tracking = False
 My.ReactionTime = Universe.BaseReactionTime
 
 
@@ -812,7 +821,6 @@ elseif My.State <= Universe.LightActiveTime then
 else
 	My.Color = Color_Red
 end if
-}
 #end_rule UNIVERSE.ROAD.STOPLIGHT
 
 
@@ -1408,7 +1416,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 1317, 0, 486, 827;
+    Display_Area = 1434, 58, 486, 827;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -1481,7 +1489,7 @@ Control_Panel {
         Font_Color = 0, 0, 0;
         Font_Background_Color = 0, 0, 0;
         Var_Name = "Universe.Datapoints";
-        Text_Data = "10";
+        Text_Data = "1000";
     }
     Panel_Item {
         Item_Type = Edit_Box;
@@ -1494,7 +1502,7 @@ Control_Panel {
         Font_Color = 0, 0, 0;
         Font_Background_Color = 0, 0, 0;
         Var_Name = "Universe.SpeedPoints";
-        Text_Data = "10";
+        Text_Data = "100";
     }
     Panel_Item {
         Item_Type = Drop_Down_List;
@@ -1523,7 +1531,7 @@ Control_Panel {
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
-        Slider_Value = "5";
+        Slider_Value = "0";
     }
     Panel_Item {
         Item_Type = Toggle;
@@ -1550,7 +1558,7 @@ Control_Panel {
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
-        Slider_Value = "5";
+        Slider_Value = "0";
         Shortcut_Key = "";
     }
     Panel_Item {
@@ -1606,7 +1614,7 @@ Control_Panel {
         Control_Off_Long = 0;
         Control_Off_Double = 0.0;
         Control_Off_String = "";
-        Toggle_Button_On = No;
+        Toggle_Button_On = Yes;
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
@@ -1634,7 +1642,7 @@ Control_Panel {
         Control_Off_Long = 0;
         Control_Off_Double = 0.0;
         Control_Off_String = "";
-        Toggle_Button_On = No;
+        Toggle_Button_On = Yes;
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
@@ -1693,7 +1701,7 @@ Control_Panel {
         Control_Off_Long = 0;
         Control_Off_Double = 0.0;
         Control_Off_String = "";
-        Toggle_Button_On = No;
+        Toggle_Button_On = Yes;
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
@@ -1711,7 +1719,7 @@ Control_Panel {
         Font_Color = 0, 0, 0;
         Font_Background_Color = 0, 0, 0;
         Var_Name = "Universe.WatchTime";
-        Text_Data = "200";
+        Text_Data = "120";
     }
     Panel_Item {
         Item_Type = Toggle;
@@ -1759,8 +1767,8 @@ Others_Data {
     Rule_Colored = Yes;
     Rule_LineNo = Yes;
     Window_Hide_Run = 1;
-    Debug_Position_x = 75;
-    Debug_Position_y = 75;
+    Debug_Position_x = 83;
+    Debug_Position_y = 673;
     Debug_Size_x = 400;
     Debug_Size_y = 200;
     Console_Position_x = 219;
