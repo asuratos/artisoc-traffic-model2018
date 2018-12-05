@@ -14,119 +14,130 @@ except:
     pass
 
 #Phantom Jams
+# Check if user wants to plot Jams
+plot = input("Plot Phantom Jams (y/n)?")
 
-#Prepare relevant plot directories
-try:
-    os.mkdir("plots\Jams")
-    os.mkdir("plots\Jams\\"+outputext)
-except:
-    pass
+if plot == "Y" or plot == "y":
+    #Prepare relevant plot directories
+    try:
+        os.mkdir("plots\Jams")
+        os.mkdir("plots\Jams\\"+outputext)
+    except:
+        pass
 
-jamdata = pd.read_csv("Jams.csv")
+    jamdata = pd.read_csv("Jams.csv")
 
-for reaction in jamdata["Reaction"].unique():
-    for density in jamdata["Total Cars"].unique():
-        for asocialrate in jamdata["ASocial Rate"].unique():
-            sns.scatterplot(x = "Time", y = "Y", s = 20,
-                        data = jamdata[(jamdata["Total Cars"] == density) & 
-                                       (jamdata["Reaction"] == reaction) & 
-                                       (jamdata["ASocial Rate"] == asocialrate)])
-    
-            plt.title("Location of Traffic Jams\n(%s cars, %s asocial rate, %s reaction time)" % (density, asocialrate, reaction))
-    
-            plt.xlabel("Time (s)")
-            plt.ylabel("Position on Road")
-    
-            plt.xlim(xmin = jamdata["Time"].min(), xmax = jamdata["Time"].max())
-            plt.ylim(ymin = 0, ymax = 300)
-    
-            plt.savefig("plots\Jams\\" 
-                        + outputext 
-                        + "\jamlocation_%scars_%sasocial_%sreaction." % (density, asocialrate, reaction) 
-                        + outputext)
-            plt.clf()
-            #plt.show()
+    for reaction in jamdata["Reaction"].unique():
+        for density in jamdata["Total Cars"].unique():
+            for asocialrate in jamdata["ASocial Rate"].unique():
+                sns.scatterplot(x = "Time", y = "Y", s = 20,
+                            data = jamdata[(jamdata["Total Cars"] == density) & 
+                                        (jamdata["Reaction"] == reaction) & 
+                                        (jamdata["ASocial Rate"] == asocialrate)])
+        
+                plt.title("Location of Traffic Jams\n(%s cars, %s asocial rate, %s reaction time)" % (density, asocialrate, reaction))
+        
+                plt.xlabel("Time (s)")
+                plt.ylabel("Position on Road")
+        
+                plt.xlim(xmin = jamdata["Time"].min(), xmax = jamdata["Time"].max())
+                plt.ylim(ymin = 0, ymax = 300)
+        
+                plt.savefig("plots\Jams\\" 
+                            + outputext 
+                            + "\jamlocation_%scars_%sasocial_%sreaction." % (density, asocialrate, reaction) 
+                            + outputext)
+                plt.clf()
+                #plt.show()
 
-print("Jam Plotting Done!")
+    print("Jam Plotting Done!")
 
 #Speed Time Series
 
-#Prepare relevant plot directories
-try:
-    os.mkdir("plots\SpeedSeries")
-    os.mkdir("plots\SpeedSeries\\"+outputext)
-except:
-    pass
+# Check if user wants to plot Speed Time Series
+plot = input("Plot Speed Time Series (y/n)?")
 
-speeds = pd.read_csv("singlecar.csv")
+if plot == "Y" or plot == "y":
+    #Prepare relevant plot directories
+    try:
+        os.mkdir("plots\SpeedSeries")
+        os.mkdir("plots\SpeedSeries\\"+outputext)
+    except:
+        pass
 
-for reaction in speeds["Reaction"].unique():
-    for density in speeds["TotalCars"].unique():
-        for asocialrate in speeds["ASocial Rate"].unique(): 
-            
-            dataslice = speeds[(speeds["Reaction"] == reaction) &
-                               (speeds["ASocial Rate"] == asocialrate) &
-                               (speeds["TotalCars"] == density)]
-            
-            for asocial in dataslice["ASocial"].unique():
-                sns.lineplot(x = "Lifetime", 
-                             y = "Speed",
-                             data = dataslice[dataslice["ASocial"] == asocial],
-                             err_style = None)
+    speeds = pd.read_csv("singlecar.csv")
 
-                plt.title("Speed for a single car\n(%s cars, %s asocial rate, %s reaction, %s)" 
-                          % (density, asocialrate, reaction, "ASocial" if asocial else "Social"))
-
-                plt.ylim(ymin = 0)
-                plt.xlim(xmin = 0, xmax = dataslice[dataslice["ASocial"] == asocial]["Lifetime"].max())
+    for reaction in speeds["Reaction"].unique():
+        for density in speeds["TotalCars"].unique():
+            for asocialrate in speeds["ASocial Rate"].unique(): 
                 
-                plt.xlabel("Time (s)")
-                plt.ylabel("Speed (km/h)")
-
-                plt.savefig("plots\SpeedSeries\\"
-                            + outputext
-                            + "\speedseries_%scars_%sasocialrate_%sreaction_%s." 
-                            % (density, asocialrate, reaction, "asocial" if asocial else "social")
-                            + outputext)
+                dataslice = speeds[(speeds["Reaction"] == reaction) &
+                                (speeds["ASocial Rate"] == asocialrate) &
+                                (speeds["TotalCars"] == density)]
                 
-                plt.clf()
-                #plt.show()
-            
-print("Speed Time Series Done!")
+                for asocial in dataslice["ASocial"].unique():
+                    sns.lineplot(x = "Lifetime", 
+                                y = "Speed",
+                                data = dataslice[dataslice["ASocial"] == asocial],
+                                err_style = None)
+
+                    plt.title("Speed for a single car\n(%s cars, %s asocial rate, %s reaction, %s)" 
+                            % (density, asocialrate, reaction, "ASocial" if asocial else "Social"))
+
+                    plt.ylim(ymin = 0)
+                    plt.xlim(xmin = 0, xmax = dataslice[dataslice["ASocial"] == asocial]["Lifetime"].max())
+                    
+                    plt.xlabel("Time (s)")
+                    plt.ylabel("Speed (km/h)")
+
+                    plt.savefig("plots\SpeedSeries\\"
+                                + outputext
+                                + "\speedseries_%scars_%sasocialrate_%sreaction_%s." 
+                                % (density, asocialrate, reaction, "asocial" if asocial else "social")
+                                + outputext)
+                    
+                    plt.clf()
+                    #plt.show()
+                
+    print("Speed Time Series Done!")
 
 # Congestion
+# Check if user wants to plot congestion
+plot = input("Plot congestion (y/n)?")
 
-#Prepare relevant plot directories
-try:
-    os.mkdir("plots\congestion")
-    os.mkdir("plots\congestion\\"+outputext)
-except:
-    pass
+if plot == "Y" or plot == "y":
 
-speeddata = pd.read_csv("speeds.csv")
+    #Prepare relevant plot directories
+    try:
+        os.mkdir("plots\congestion")
+        os.mkdir("plots\congestion\\"+outputext)
+    except:
+        pass
 
-for asocialrate in speeddata["ASocial Rate"].unique():
-    dataslice = speeddata[speeddata["ASocial Rate"] == asocialrate]
-    sns.lineplot(x = "Total Cars", 
-                 y = "Slowed", 
-                 data = dataslice,
-                 style = "ASocial",
-                 hue = dataslice["Reaction Time"].replace(dataslice["Reaction Time"].unique(), ["Instant", "Normal", "Slow"]),
-                err_style= None)
+    speeddata = pd.read_csv("speeds.csv")
 
-    plt.title("Ratio of slowed cars (%s asocial rate)" % asocialrate)
-    
+    for asocialrate in speeddata["ASocial Rate"].unique():
+        dataslice = speeddata[speeddata["ASocial Rate"] == asocialrate]
+        sns.lineplot(x = "Total Cars", 
+                    y = "Slowed", 
+                    data = dataslice,
+                    style = "ASocial",
+                    hue = dataslice["Reaction Time"].replace(dataslice["Reaction Time"].unique(), ["Instant", "Normal", "Slow"]),
+                    err_style= None)
 
-    plt.xlim(xmin = dataslice["Total Cars"].min(), xmax = dataslice["Total Cars"].max())
-    plt.ylim(ymin = 0, ymax = 1)
-    
-    plt.ylabel("Ratio of Cars Slowed")
-    
-    plt.savefig("plots\congestion\\"
-               +outputext
-               +"\congestion_%sasocialrate." % asocialrate
-               +outputext)
-    plt.clf()
-    #plt.show()
+        plt.title("Ratio of slowed cars (%s asocial rate)" % asocialrate)
+        
 
-print("Congestion Plots Done!")
+        plt.xlim(xmin = dataslice["Total Cars"].min(), xmax = dataslice["Total Cars"].max())
+        plt.ylim(ymin = 0, ymax = 1)
+        
+        plt.ylabel("Ratio of Cars Slowed")
+        
+        plt.savefig("plots\congestion\\"
+                +outputext
+                +"\congestion_%sasocialrate." % asocialrate
+                +outputext)
+        plt.clf()
+        #plt.show()
+
+    print("Congestion Plots Done!")
