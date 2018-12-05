@@ -47,6 +47,7 @@ for reaction in jamdata["Reaction"].unique():
             plt.clf()
             #plt.show()
 
+print("Jam Plotting Done!")
 
 #Speed Time Series
 
@@ -90,6 +91,8 @@ for reaction in speeds["Reaction"].unique():
                 
                 plt.clf()
                 #plt.show()
+            
+print("Speed Time Series Done!")
 
 # Congestion
 
@@ -125,3 +128,5 @@ for asocialrate in speeddata["ASocial Rate"].unique():
                +outputext)
     plt.clf()
     #plt.show()
+
+print("Congestion Plots Done!")
