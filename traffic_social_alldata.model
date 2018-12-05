@@ -97,7 +97,7 @@ UNIVERSE {
 // Agent Variable Initial Data
 //-------------------------------------------------------
 Initial_Value {
-    UNIVERSE.STARTINGCARS = 1(160);
+    UNIVERSE.STARTINGCARS = 1(190);
     UNIVERSE.SCALING = 1(36.0);
     UNIVERSE.TARGETS = 1(0);
     UNIVERSE.ASOCIALRATE = 1(0.5);
@@ -112,16 +112,16 @@ Initial_Value {
     UNIVERSE.NUMWAVES = 1(1);
     UNIVERSE.LIGHTACTIVETIME = 1(1.0);
     UNIVERSE.STARTINGPATIENCE = 1(10);
-    UNIVERSE.RECORDDATA = 1(0);
+    UNIVERSE.RECORDDATA = 1(1);
     UNIVERSE.MAXCARS = 1(300);
-    UNIVERSE.DUMPSPEEDS = 1(0);
+    UNIVERSE.DUMPSPEEDS = 1(1);
     UNIVERSE.SPEEDPOINTS = 1(1000);
     UNIVERSE.TIMESCALING = 1(0.0);
     UNIVERSE.BASEREACTIONTIME = 1(0);
     UNIVERSE.RECORDEDSPEEDPOINTS = 1(0);
-    UNIVERSE.DUMPJAMS = 1(0);
+    UNIVERSE.DUMPJAMS = 1(1);
     UNIVERSE.WATCHTIME = 1(120);
-    UNIVERSE.TRACKCAR = 1(0);
+    UNIVERSE.TRACKCAR = 1(1);
 }
 
 
@@ -404,7 +404,11 @@ reinitialize()
 Agt_Step{
 
 //Accelerate. If recovering from a previous deceleration, then acelerate carefully.
-My.Accel = 3.6 * 1.7 * (Exp((My.Speed / 3.6) * 0.04) ) //data from Mehar, et al. 2013
+My.Accel = 3.6 * 1.7 * (Exp((My.Speed / 3.6) * (-0.04)) ) //data from Mehar, et al. 2013
+
+if My.Accel > 3.6 * 1.7 then
+	My.Accel = 3.6 * 1.7 //cap Acceleration
+end if
 
 if My.Recovering < My.RecoveryTime then
 	My.Accel = My.Accel * 0.5
@@ -510,7 +514,7 @@ My.Allowance = 1 + (My.Speed/Universe.Scaling) * 2
 
 If headway < My.Allowance then
 	if My.Allowance - headway > 10 / Universe.SpaceScaling then
-		My.Speed = (My.Allowance - (10/Universe.SpaceScaling)) * Universe.Scaling
+		My.Speed = (My.Allowance - (10/Universe.SpaceScaling) - 1) * Universe.Scaling * 0.6
 	else
 		My.Speed = (headway - 1) * Universe.Scaling * 0.6
 	end if
@@ -661,8 +665,7 @@ else
 end if
 
 My.Speed = My.MaxSpeed
-My.Accel = 3.6 * 1.7 * (Exp((My.Speed / 3.6) * 0.04) ) //data from Mehar, et al. 2013
-
+My.Accel = 5//3.6 * 1.7 * (Exp((My.Speed / 3.6) * (-0.04)) ) //data from Mehar, et al. 2013
 
 // Recovery time is the number of seconds a car will have a reduced acceleration value.
 if Universe.RandomRecoveryTime then
@@ -842,7 +845,7 @@ Single_Simulation {
     Step_Max = 0;
     Time_Max = 0;
     End_Condition = "";
-    Exec_Wait = 209;
+    Exec_Wait = 0;
     Exec_Wait_Max = 0;
     Random_Generator = Java_Standard;
     Exec_Order = Random;
@@ -1441,7 +1444,7 @@ Control_Panel {
         Slider_Range_Max = 29;
         Slider_Value_Min = 10.0;
         Slider_Value_Step = 10.0;
-        Slider_Value = "15";
+        Slider_Value = "18";
     }
     Panel_Item {
         Item_Type = Slider;
@@ -1623,7 +1626,7 @@ Control_Panel {
         Control_Off_Long = 0;
         Control_Off_Double = 0.0;
         Control_Off_String = "";
-        Toggle_Button_On = No;
+        Toggle_Button_On = Yes;
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
@@ -1651,7 +1654,7 @@ Control_Panel {
         Control_Off_Long = 0;
         Control_Off_Double = 0.0;
         Control_Off_String = "";
-        Toggle_Button_On = No;
+        Toggle_Button_On = Yes;
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
@@ -1710,7 +1713,7 @@ Control_Panel {
         Control_Off_Long = 0;
         Control_Off_Double = 0.0;
         Control_Off_String = "";
-        Toggle_Button_On = No;
+        Toggle_Button_On = Yes;
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
@@ -1751,7 +1754,7 @@ Control_Panel {
         Control_Off_Long = 0;
         Control_Off_Double = 0.0;
         Control_Off_String = "";
-        Toggle_Button_On = No;
+        Toggle_Button_On = Yes;
         Slider_Range_Max = 10;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
@@ -1780,8 +1783,8 @@ Others_Data {
     Debug_Position_y = 673;
     Debug_Size_x = 400;
     Debug_Size_y = 200;
-    Console_Position_x = 107;
-    Console_Position_y = 217;
+    Console_Position_x = 167;
+    Console_Position_y = 467;
     Console_Size_x = 600;
     Console_Size_y = 452;
     Componen_Tree_Position_x = 2;
