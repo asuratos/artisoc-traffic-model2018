@@ -30,12 +30,40 @@ if plot == "Y" or plot == "y":
     for reaction in jamdata["Reaction"].unique():
         for density in jamdata["Total Cars"].unique():
             for asocialrate in jamdata["ASocial Rate"].unique():
-                sns.scatterplot(x = "Time", y = "Y", s = 20,
-                            data = jamdata[(jamdata["Total Cars"] == density) & 
-                                        (jamdata["Reaction"] == reaction) & 
-                                        (jamdata["ASocial Rate"] == asocialrate)])
-        
-                plt.title("Location of Traffic Jams\n(%s cars, %s asocial rate, %s reaction time)" % (density, asocialrate, reaction))
+
+                dataslice = jamdata[(jamdata["Total Cars"] == density) & 
+                            (jamdata["Reaction"] == reaction) & 
+                            (jamdata["ASocial Rate"] == asocialrate)]
+
+
+                sns.scatterplot(x = "Time", 
+                            y = "Y", 
+                            s = 20,
+                            data = dataslice[~dataslice["ASocial"]],
+                            label = "Social")
+                sns.scatterplot(x = "Time", 
+                            y = "Y", 
+                            s = 20,
+                            data = dataslice[dataslice["ASocial"]],
+                            label = "ASocial")  
+                
+                social_count = dataslice[~dataslice["ASocial"]]["ASocial"].count()
+
+                asocial_count = dataslice[dataslice["ASocial"]]["ASocial"].count()
+
+
+                total = social_count + asocial_count
+                
+                # asocial_count = jamdata[(jamdata["Total Cars"] == density) & 
+                #                         (jamdata["Reaction"] == reaction) & 
+                #                         (jamdata["ASocial Rate"] == asocialrate)]["ASocial"].count()
+                
+                # social_count = jamdata[(jamdata["Total Cars"] == density) & 
+                #                         (jamdata["Reaction"] == reaction) & 
+                #                         (jamdata["ASocial Rate"] == asocialrate)]["ASocial"].count()
+
+                plt.title("Location of Traffic Jams\n(%s cars, %s asocial rate, %s reaction time)\n%s Social, %s ASocial (%.2f)" % 
+                            (density, asocialrate, reaction, social_count, asocial_count, float(asocial_count/(total)) if total != 0 else 0))
         
                 plt.xlabel("Time (s)")
                 plt.ylabel("Position on Road")
