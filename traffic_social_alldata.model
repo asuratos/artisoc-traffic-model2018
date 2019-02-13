@@ -20,7 +20,7 @@ UNIVERSE {
             Dim Layer(0, 0) As Integer = (0);
             Dim Direction(0, 0) As Double = (0.0);
             Dim MaxSpeed(0, 0) As Double = (0.0);
-            Dim Speed(0, 0) <1>  As Double = ();
+            Dim Speed(0, 0) <1>  As Double = (0.0);
             Dim Target(0, 0) As Double = (0.0);
             Dim ASocial(0, 0) As Boolean = (0);
             Dim Accel(0, 0) As Double = (0.0);
@@ -37,7 +37,7 @@ UNIVERSE {
             Dim FrontDists(0, 0) <3> [3] As Integer = (3*0);
             Dim BackDists(0, 0) <3> [2] As Integer = (2*0);
             Dim ReactionTime(0, 0) As Integer = (0);
-            Dim Tracking(0, 0) As Boolean = ();
+            Dim Tracking(0, 0) As Boolean = (0);
         }
         AgtType Stoplight(0, 0)[0] {
             Dim ID(0, 0) As Integer = (0);
@@ -82,14 +82,14 @@ UNIVERSE {
     Dim SpaceScaling(0, 0) As Double = (0.0);
     Dim TimeScaling(0, 0) As Double = (0.0);
     Dim BaseReactionTime(0, 0) As Integer = (0);
-    Dim RecordedSpeedPoints(0, 0) As Integer = ();
-    Dim DumpJams(0, 0) As Boolean = ();
-    Dim WatchTime(0, 0) As Integer = ();
-    Dim TrackCar(0, 0) As Boolean = ();
-    Dim TrackingDoneSocial(0, 0) As Boolean = ();
-    Dim TrackingDoneAsocial(0, 0) As Boolean = ();
-    Dim currentlyTrackingSocial(0, 0) As Boolean = ();
-    Dim currentlyTrackingASocial(0, 0) As Boolean = ();
+    Dim RecordedSpeedPoints(0, 0) As Integer = (0);
+    Dim DumpJams(0, 0) As Boolean = (0);
+    Dim WatchTime(0, 0) As Integer = (0);
+    Dim TrackCar(0, 0) As Boolean = (0);
+    Dim TrackingDoneSocial(0, 0) As Boolean = (0);
+    Dim TrackingDoneAsocial(0, 0) As Boolean = (0);
+    Dim currentlyTrackingSocial(0, 0) As Boolean = (0);
+    Dim currentlyTrackingASocial(0, 0) As Boolean = (0);
 }
 
 
@@ -404,11 +404,11 @@ reinitialize()
 Agt_Step{
 
 //Accelerate. If recovering from a previous deceleration, then acelerate carefully.
-My.Accel = 3.6 * 1.7 * (Exp((My.Speed / 3.6) * (-0.04)) ) //data from Mehar, et al. 2013
+My.Accel = (1.381 - (My.Speed  * (0.011)))^2 //data from Wang, et al. 2004
 
-if My.Accel > 3.6 * 1.7 then
-	My.Accel = 3.6 * 1.7 //cap Acceleration
-end if
+/*if My.Accel > 3.6 * 1.7 then
+	My.Accel = 3.6 * 1.7 //cap Acceleration, used for the Mehar version
+end if*/
 
 if My.Recovering < My.RecoveryTime then
 	My.Accel = My.Accel * 0.5
@@ -1428,7 +1428,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 1434, 58, 486, 827;
+    Display_Area = 1580, 88, 324, 634;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
