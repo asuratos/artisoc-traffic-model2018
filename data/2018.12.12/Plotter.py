@@ -6,7 +6,7 @@ import os
 import glob
 
 sns.set()
-outputext = "jpg"
+outputext = "eps"
 
 try:
     os.mkdir("plots")
@@ -21,6 +21,9 @@ if plot == "Y" or plot == "y":
     #Prepare relevant plot directories
     try:
         os.mkdir("plots\Jams")
+    except:
+        pass
+    try:
         os.mkdir("plots\Jams\\"+outputext)
     except:
         pass
@@ -70,6 +73,9 @@ if plot == "Y" or plot == "y":
         
                 plt.xlim(xmin = jamdata["Time"].min(), xmax = jamdata["Time"].max())
                 plt.ylim(ymin = 0, ymax = 300)
+
+                if asocialrate == 1.0 or asocialrate == 0.0:
+                    plt.legend([], frameon=False)
         
                 plt.savefig("plots\Jams\\" 
                             + outputext 

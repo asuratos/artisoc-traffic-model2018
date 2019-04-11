@@ -6,7 +6,7 @@ import os
 import glob
 
 sns.set()
-outputext = "eps"
+outputext = "pdf"
 
 try:
     os.mkdir("plots")
@@ -67,7 +67,13 @@ if plot == "Y" or plot == "y":
                 #                         (jamdata["Reaction"] == reaction) & 
                 #                         (jamdata["ASocial Rate"] == asocialrate)]["ASocial"].count()
 
-                plt.title("Location of Traffic Jams\n(%s cars, %s asocial rate, %s reaction time)\n%s Social, %s ASocial (%.2f)" % 
+                if asocialrate == 0 or asocialrate == 1:
+                    plt.title("Location of Traffic Jams\n(%s cars, %s asocial rate, %s reaction time)" % 
+                            (density, asocialrate, reaction))
+                    plt.legend([], frameon=False)
+
+                else:
+                    plt.title("Location of Traffic Jams\n(%s cars, %s asocial rate, %s reaction time)\nFull stops: %s Social, %s ASocial (%.2f)" % 
                             (density, asocialrate, reaction, social_count, asocial_count, float(asocial_count/(total)) if total != 0 else 0))
         
                 plt.xlabel("Time (s)")
